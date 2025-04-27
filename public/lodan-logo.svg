@@ -1,0 +1,21 @@
+<svg width="400" height="120" viewBox="0 0 400 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="120" rx="24" fill="url(#bg)"/>
+  <g>
+    <!-- Cart Icon -->
+    <rect x="40" y="35" width="50" height="35" rx="10" fill="#fbbf24" opacity="0.18"/>
+    <path d="M60 60h32l-4 12H62l-2-6" stroke="#fbbf24" stroke-width="3" fill="none"/>
+    <circle cx="66" cy="76" r="4" fill="#fbbf24"/>
+    <circle cx="84" cy="76" r="4" fill="#fbbf24"/>
+    <rect x="58" y="45" width="28" height="8" rx="4" fill="#fbbf24"/>
+    <rect x="63" y="38" width="18" height="8" rx="4" fill="#fbbf24" opacity="0.7"/>
+  </g>
+  <!-- Text -->
+  <text x="110" y="62" font-family="Inter, sans-serif" font-size="36" font-weight="bold" fill="#222">Lodan <tspan fill="#fbbf24">Market</tspan></text>
+  <text x="112" y="90" font-family="Inter, sans-serif" font-size="16" fill="#888">Votre marché local bio & durable</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="400" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fefcf4"/>
+      <stop offset="1" stop-color="#eec745"/>
+    </linearGradient>
+  </defs>
+</svg>
