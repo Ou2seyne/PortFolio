@@ -1,96 +1,69 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { motion, useScroll } from 'framer-motion';
 import AnimatedHeader from './components/AnimatedHeader';
 import Hero from './components/Hero';
 import About from './components/About';
 import ProjectsGallery from './components/ProjectsGallery';
+import Contact from './components/Contact';
+import { AnimatePresence } from 'framer-motion';
 
-export default function App() {
+function AppRoutes({ contactModalOpen, setContactModalOpen }) {
   const heroRef = useRef(null);
   const aboutRef = useRef(null);
   const projectsRef = useRef(null);
-  const [logoInNavbar, setLogoInNavbar] = useState(false);
-  const [activeSection, setActiveSection] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedMode = localStorage.getItem('theme');
-      if (savedMode) return savedMode === 'dark';
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return true;
+    const stored = localStorage.getItem('theme');
+    if (stored) return stored === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
+  const [logoInNavbar, setLogoInNavbar] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
   const { scrollYProgress } = useScroll();
+  const location = useLocation();
 
-  const navItems = [
-    { name: 'A propos', href: '#about' },
-    { name: 'Projets', href: '#projects' },
-  ];
+  // Dynamic navItems based on route
+  const navItems =
+    location.pathname === '/contact'
+      ? [{ name: 'Accueil', href: '/' }]
+      : [
+          { name: 'A propos', href: '#about' },
+          { name: 'Projets', href: '#projects' },
+        ];
 
   useEffect(() => {
-    const sections = [
-      { id: 'hero', ref: heroRef },
-      { id: 'about', ref: aboutRef },
-      { id: 'projects', ref: projectsRef },
-    ];
-
     const handleScroll = () => {
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        setLogoInNavbar(rect.bottom <= 60);
-      }
+      if (window.scrollY > 80) setLogoInNavbar(true);
+      else setLogoInNavbar(false);
 
-      const currentSection = sections
-        .filter((section) => section.ref.current)
-        .find((section) => {
-          const rect = section.ref.current.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
-        });
-
-      if (currentSection) {
-        setActiveSection(currentSection.id);
+      // Section highlighting
+      const sections = [
+        { id: 'hero', ref: heroRef },
+        { id: 'about', ref: aboutRef },
+        { id: 'projects', ref: projectsRef },
+      ];
+      const scrollPos = window.scrollY + 120;
+      let current = 'hero';
+      for (const section of sections) {
+        if (section.ref.current) {
+          const top = section.ref.current.offsetTop;
+          if (scrollPos >= top) current = section.id;
+        }
       }
+      setActiveSection(current);
     };
-
-    window.addEventListener('scroll', handleScroll);
-    handleScroll();
-
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    const handleHashClick = (e) => {
-      const target = e.target.closest('a');
-      if (!target) return;
-
-      const href = target.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        e.preventDefault();
-        const element = document.querySelector(href);
-        if (element) {
-          const topOffset = 80;
-          const elementPosition = element.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - topOffset;
-
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth',
-          });
-        }
-      }
-    };
-
-    document.addEventListener('click', handleHashClick);
-    return () => document.removeEventListener('click', handleHashClick);
-  }, []);
+  const toggleDarkMode = () => {
+    setIsDarkMode((prevMode) => {
+      const newMode = !prevMode;
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+      document.documentElement.classList.toggle('dark', newMode);
+      return newMode;
+    });
+  };
 
   const bgElements = Array.from({ length: 5 }).map((_, i) => ({
     id: i,
@@ -100,16 +73,8 @@ export default function App() {
     delay: Math.random() * 2,
   }));
 
-  const toggleDarkMode = () => {
-    setIsDarkMode((prevMode) => {
-      const newMode = !prevMode;
-      localStorage.setItem('theme', newMode ? 'dark' : 'light');
-      return newMode;
-    });
-  };
-
   return (
-    <div className={`min-h-screen flex flex-col items-center justify-between transition-colors duration-300 bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100`}>
+    <>
       <AnimatedHeader
         logoInNavbar={logoInNavbar}
         activeSection={activeSection}
@@ -117,7 +82,6 @@ export default function App() {
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
       />
-
       {bgElements.map((el) => (
         <motion.div
           key={el.id}
@@ -139,24 +103,70 @@ export default function App() {
           }}
         />
       ))}
-
-      <div id="hero" ref={heroRef} className="w-full">
-        <Hero logoInNavbar={logoInNavbar} isDarkMode={isDarkMode} />
-      </div>
-
-      <div id="about" ref={aboutRef} className="w-full pt-24">
-        <About isDarkMode={isDarkMode} />
-      </div>
-
-      <div id="projects" ref={projectsRef} className="w-full pt-24">
-        <ProjectsGallery isDarkMode={isDarkMode} />
-      </div>
-
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <div id="hero" ref={heroRef} className="w-full">
+                <Hero logoInNavbar={logoInNavbar} isDarkMode={isDarkMode} />
+              </div>
+              <div id="about" ref={aboutRef} className="w-full pt-24">
+                <About isDarkMode={isDarkMode} onOpenContact={() => setContactModalOpen(true)} />
+              </div>
+              <div id="projects" ref={projectsRef} className="w-full pt-24">
+                <ProjectsGallery isDarkMode={isDarkMode} />
+              </div>
+            </>
+          }
+        />
+      </Routes>
+      <AnimatePresence>
+        {contactModalOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setContactModalOpen(false)}
+            aria-modal="true"
+            role="dialog"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              className="relative w-full max-w-3xl mx-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                className="absolute top-4 right-4 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold to-orange shadow-lg border-2 border-white/70 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gold/30 group"
+                onClick={() => setContactModalOpen(false)}
+                aria-label="Fermer le formulaire de contact"
+                type="button"
+              >
+                <svg
+                  className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300 drop-shadow"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
+                  <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
+                </svg>
+              </button>
+              <Contact />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <motion.div
         className="fixed bottom-0 left-0 right-0 h-1 bg-gold origin-left z-50"
         style={{ scaleX: scrollYProgress }}
       />
-
       <motion.button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="fixed bottom-6 right-6 bg-gold text-background p-3 rounded-full shadow-lg z-50"
@@ -184,6 +194,19 @@ export default function App() {
           />
         </svg>
       </motion.button>
-    </div>
+    </>
+  );
+}
+
+export default function App() {
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  return (
+    <Router>
+      <div
+        className={`min-h-screen flex flex-col items-center justify-between transition-colors duration-300 bg-white dark:bg-neutral-900 text-gray-900 dark:text-gray-100`}
+      >
+        <AppRoutes contactModalOpen={contactModalOpen} setContactModalOpen={setContactModalOpen} />
+      </div>
+    </Router>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, Component } from 'react';
+import React, { useRef, useEffect, useState, Component, useMemo } from 'react';
 import { motion, useSpring, useTransform, useInView, useScroll, useReducedMotion, AnimatePresence } from 'framer-motion';
 import Spline from '@splinetool/react-spline';
 
@@ -27,13 +27,174 @@ class SplineErrorBoundary extends Component {
   }
 }
 
-export default function Hero({ logoInNavbar, isDarkMode }) {
+export default function HeroV2({ logoInNavbar, isDarkMode }) {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   const shouldReduceMotion = useReducedMotion();
   const [isSplineLoaded, setIsSplineLoaded] = useState(false);
   const [showInteractHint, setShowInteractHint] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [mouseTrail, setMouseTrail] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+  const [animationSequence, setAnimationSequence] = useState(0);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [hoveredWord, setHoveredWord] = useState(null);
+  const [magneticActive, setMagneticActive] = useState(false);
+  const MAX_TRAIL_POINTS = 12;
+  const ctaRef = useRef(null);
+  const orbsRef = useRef([]);
+  
+  // Particle system for advanced background effects
+  const [particles, setParticles] = useState([]);
+  const PARTICLE_COUNT = useMemo(() => isMobile ? 30 : 60, [isMobile]);
+
+  // Audio feedback for interactions
+  const playSound = (type) => {
+    if (shouldReduceMotion) return;
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    
+    switch(type) {
+      case 'hover':
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 440;
+        gain.gain.value = 0.1;
+        break;
+      case 'click':
+        oscillator.type = 'triangle';
+        oscillator.frequency.value = 660;
+        gain.gain.value = 0.15;
+        break;
+      default:
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 220;
+        gain.gain.value = 0.05;
+    }
+    
+    oscillator.start();
+    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+    oscillator.stop(ctx.currentTime + 0.3);
+  };
+
+  // Device detection
+  useEffect(() => {
+    const checkDevice = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  // Initialize particles
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    
+    const newParticles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      newParticles.push({
+        id: i,
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        size: Math.random() * 4 + 1,
+        color: [
+          `rgba(234, 179, 8, ${Math.random() * 0.5 + 0.2})`,
+          `rgba(255, 85, 0, ${Math.random() * 0.4 + 0.1})`,
+          `rgba(255, 255, 255, ${Math.random() * 0.2 + 0.1})`,
+        ][Math.floor(Math.random() * 3)],
+        vx: Math.random() * 0.5 - 0.25,
+        vy: Math.random() * 0.5 - 0.25,
+        life: Math.random() * 100
+      });
+    }
+    setParticles(newParticles);
+    
+    // Create dynamic orbs
+    if (sectionRef.current) {
+      const orbs = [];
+      for (let i = 0; i < 3; i++) {
+        const orb = document.createElement('div');
+        orb.className = 'absolute rounded-full filter blur-xl';
+        orb.style.width = `${Math.random() * 300 + 200}px`;
+        orb.style.height = `${Math.random() * 300 + 200}px`;
+        orb.style.background = i === 0 ? 
+          'radial-gradient(circle, rgba(234,179,8,0.3) 0%, rgba(234,179,8,0) 70%)' : 
+          i === 1 ? 
+          'radial-gradient(circle, rgba(255,85,0,0.2) 0%, rgba(255,85,0,0) 70%)' :
+          'radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%)';
+        orb.style.left = `${Math.random() * 100}%`;
+        orb.style.top = `${Math.random() * 100}%`;
+        orb.style.opacity = isDarkMode ? '0.4' : '0.6';
+        orb.style.transform = 'translate(-50%, -50%)';
+        orb.style.zIndex = '-5';
+        sectionRef.current.appendChild(orb);
+        orbsRef.current.push(orb);
+        
+        // Animate orbs
+        const animateOrb = () => {
+          const targetX = Math.random() * 100;
+          const targetY = Math.random() * 100;
+          
+          orb.animate(
+            [
+              { left: `${orb.style.left}`, top: `${orb.style.top}` },
+              { left: `${targetX}%`, top: `${targetY}%` }
+            ],
+            {
+              duration: Math.random() * 15000 + 10000,
+              easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+              fill: 'forwards'
+            }
+          ).onfinish = () => {
+            orb.style.left = `${targetX}%`;
+            orb.style.top = `${targetY}%`;
+            animateOrb();
+          };
+        };
+        
+        animateOrb();
+      }
+    }
+    
+    return () => {
+      orbsRef.current.forEach(orb => orb.remove());
+      orbsRef.current = [];
+    };
+  }, [shouldReduceMotion, isDarkMode, PARTICLE_COUNT]);
+
+  // Animation sequence controller
+  useEffect(() => {
+    if (isInView) {
+      const sequence = [
+        setTimeout(() => setAnimationSequence(1), 100),  // Logo
+        setTimeout(() => setAnimationSequence(2), 600),  // Heading
+        setTimeout(() => setAnimationSequence(3), 1100), // Subheading
+        setTimeout(() => setAnimationSequence(4), 1600), // CTA
+        setTimeout(() => setAnimationSequence(5), 2100)  // 3D Model & Social
+      ];
+      
+      return () => sequence.forEach(timeout => clearTimeout(timeout));
+    }
+  }, [isInView]);
+
+  // Performance detection
+  const isLowPoweredDevice = () => {
+    return (
+      (window.navigator.hardwareConcurrency !== undefined && window.navigator.hardwareConcurrency <= 4) || 
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    );
+  };
+  
+  const effectIntensity = isLowPoweredDevice() ? 0.5 : 1;
+  const optimizedShapeCount = isLowPoweredDevice() ? 
+    (isMobile ? 5 : 12) : 
+    (isMobile ? 10 : 25);
 
   const { scrollY } = useScroll();
   const mouseX = useSpring(0, { stiffness: 100, damping: 20 });
@@ -44,6 +205,38 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
   const rotateZ = useTransform(scrollY, [0, 300], shouldReduceMotion ? [0, 0] : [0, 10]);
   const floatY = useTransform(scrollY, [0, 200], shouldReduceMotion ? [0, 0] : [0, -20]);
 
+  // Magnetic button effect
+  useEffect(() => {
+    if (shouldReduceMotion || !ctaRef.current) return;
+    
+    const handleMagneticEffect = (e) => {
+      if (!magneticActive) return;
+      
+      const { left, top, width, height } = ctaRef.current.getBoundingClientRect();
+      const centerX = left + width / 2;
+      const centerY = top + height / 2;
+      
+      const distanceX = e.clientX - centerX;
+      const distanceY = e.clientY - centerY;
+      
+      const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+      const maxDistance = Math.max(width, height) * 1.5;
+      
+      if (distance < maxDistance) {
+        const magneticPull = 0.4;
+        const moveX = distanceX * magneticPull;
+        const moveY = distanceY * magneticPull;
+        
+        ctaRef.current.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      } else {
+        ctaRef.current.style.transform = 'translate(0, 0)';
+      }
+    };
+    
+    window.addEventListener('mousemove', handleMagneticEffect);
+    return () => window.removeEventListener('mousemove', handleMagneticEffect);
+  }, [shouldReduceMotion, magneticActive]);
+
   const handleMouseMove = (e) => {
     if (shouldReduceMotion || !sectionRef.current) return;
     const rect = sectionRef.current.getBoundingClientRect();
@@ -51,10 +244,123 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
     const y = (e.clientY - rect.top) / rect.height - 0.5;
     mouseX.set(x);
     mouseY.set(y);
+    setCursorPos({ x: e.clientX, y: e.clientY });
 
     if (!hasInteracted) {
       setHasInteracted(true);
       setTimeout(() => setShowInteractHint(false), 3000);
+    }
+    
+    // Update mouse trail with physics
+    if (!shouldReduceMotion && !isMobile) {
+      setMouseTrail(prev => {
+        const newPoint = { 
+          x: e.clientX, 
+          y: e.clientY, 
+          id: Date.now(),
+          scale: Math.random() * 0.5 + 0.5,
+          rotation: Math.random() * 360
+        };
+        return [newPoint, ...prev.slice(0, MAX_TRAIL_POINTS - 1)];
+      });
+    }
+    
+    // Update particles with mouse influence
+    if (!shouldReduceMotion) {
+      setParticles(prev => 
+        prev.map(p => {
+          const dx = e.clientX - p.x;
+          const dy = e.clientY - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < 200) {
+            const force = (200 - dist) / 200;
+            p.vx += dx * force * 0.02;
+            p.vy += dy * force * 0.02;
+          }
+          
+          return p;
+        })
+      );
+    }
+  };
+
+  // Particle animation frame
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    
+    let animationId;
+    const animateParticles = () => {
+      setParticles(prev => 
+        prev.map(p => {
+          // Apply physics
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.98;
+          p.vy *= 0.98;
+          p.life -= 0.1;
+          
+          // Reset particles that go out of bounds or die
+          if (p.x < 0 || p.x > window.innerWidth || p.y < 0 || p.y > window.innerHeight || p.life <= 0) {
+            return {
+              ...p,
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+              vx: Math.random() * 0.5 - 0.25,
+              vy: Math.random() * 0.5 - 0.25,
+              life: Math.random() * 100
+            };
+          }
+          
+          return p;
+        })
+      );
+      
+      animationId = requestAnimationFrame(animateParticles);
+    };
+    
+    animationId = requestAnimationFrame(animateParticles);
+    return () => cancelAnimationFrame(animationId);
+  }, [shouldReduceMotion]);
+
+  // Handle touch events for mobile
+  const handleTouch = (e) => {
+    if (shouldReduceMotion || !sectionRef.current) return;
+    const touch = e.touches[0];
+    const rect = sectionRef.current.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) / rect.width - 0.5;
+    const y = (touch.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+    setCursorPos({ x: touch.clientX, y: touch.clientY });
+
+    if (!hasInteracted) {
+      setHasInteracted(true);
+      setTimeout(() => setShowInteractHint(false), 3000);
+    }
+    
+    // Create ripple effect on touch
+    if (!shouldReduceMotion && sectionRef.current) {
+      const ripple = document.createElement('div');
+      ripple.className = 'absolute rounded-full bg-gold/20 pointer-events-none z-50';
+      ripple.style.left = `${touch.clientX}px`;
+      ripple.style.top = `${touch.clientY}px`;
+      ripple.style.width = '10px';
+      ripple.style.height = '10px';
+      ripple.style.transform = 'translate(-50%, -50%)';
+      
+      document.body.appendChild(ripple);
+      
+      ripple.animate(
+        [
+          { width: '10px', height: '10px', opacity: 1 },
+          { width: '300px', height: '300px', opacity: 0 }
+        ],
+        {
+          duration: 1000,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        }
+      ).onfinish = () => ripple.remove();
     }
   };
 
@@ -65,122 +371,136 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
     }
   }, [isSplineLoaded, shouldReduceMotion, hasInteracted]);
 
-  // Enhanced background effect with more dynamic elements
+  // WebGL background effect
   useEffect(() => {
-    if (!sectionRef.current || shouldReduceMotion) return;
-
-    const container = document.createElement('div');
-    container.className = 'absolute inset-0 pointer-events-none -z-10 overflow-hidden';
-    sectionRef.current.appendChild(container);
-
-    // Create floating shapes with enhanced variety
-    const shapeCount = window.innerWidth < 768 ? 10 : 25;
-    const shapes = [];
-
-    const shapeTypes = ['circle', 'square', 'triangle', 'diamond', 'hexagon', 'dot'];
-    const shapeColors = [
-      'rgba(234, 179, 8, 0.2)', // gold
-      'rgba(255, 85, 0, 0.15)', // orange
-      'rgba(255, 255, 255, 0.1)', // white
-      'rgba(255, 226, 89, 0.12)', // lighter gold
-      'rgba(255, 150, 50, 0.1)', // lighter orange
-    ];
-
-    for (let i = 0; i < shapeCount; i++) {
-      const shape = document.createElement('div');
-      const size = Math.random() * 120 + 40;
-      const type = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
-      const color = shapeColors[Math.floor(Math.random() * shapeColors.length)];
-      const blurAmount = Math.random() * 8 + 2;
-
-      shape.style.position = 'absolute';
-      shape.style.width = `${size}px`;
-      shape.style.height = `${size}px`;
-      shape.style.left = `${Math.random() * 100}%`;
-      shape.style.top = `${Math.random() * 100}%`;
-      shape.style.opacity = `${Math.random() * 0.5 + 0.1}`;
-      shape.style.transform = `rotate(${Math.random() * 360}deg)`;
-      shape.style.filter = `blur(${blurAmount}px)`;
-      shape.style.backdropFilter = 'blur(1px)';
-      shape.style.transition = 'all 0.3s ease';
-      shape.style.zIndex = Math.floor(Math.random() * 5) - 10;
-
-      // Different shape types with more variety
-      if (type === 'circle') {
-        shape.style.borderRadius = '50%';
-        shape.style.background = color;
-      } else if (type === 'square') {
-        shape.style.background = color;
-        shape.style.borderRadius = `${Math.random() * 10}px`;
-      } else if (type === 'triangle') {
-        shape.style.width = '0';
-        shape.style.height = '0';
-        shape.style.borderLeft = `${size/2}px solid transparent`;
-        shape.style.borderRight = `${size/2}px solid transparent`;
-        shape.style.borderBottom = `${size}px solid ${color}`;
-        shape.style.background = 'transparent';
-      } else if (type === 'diamond') {
-        shape.style.transform = `rotate(45deg) scale(${Math.random() * 0.5 + 0.5})`;
-        shape.style.background = color;
-      } else if (type === 'hexagon') {
-        shape.style.clipPath = 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)';
-        shape.style.background = color;
-      } else if (type === 'dot') {
-        shape.style.borderRadius = '50%';
-        shape.style.background = color;
-        shape.style.width = `${Math.random() * 10 + 5}px`;
-        shape.style.height = `${Math.random() * 10 + 5}px`;
-        shape.style.opacity = `${Math.random() * 0.7 + 0.3}`;
+    if (shouldReduceMotion || !sectionRef.current) return;
+    
+    const canvas = document.createElement('canvas');
+    canvas.className = 'absolute inset-0 -z-20';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    sectionRef.current.appendChild(canvas);
+    
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+    
+    // WebGL setup with minimal shaders for good performance
+    const vertexShaderSource = `
+      attribute vec2 position;
+      void main() {
+        gl_Position = vec4(position, 0.0, 1.0);
       }
-
-      // Enhanced floating animation with more natural movement
-      const duration = Math.random() * 25 + 15;
-      const xDistance = Math.random() * 60 - 30;
-      const yDistance = Math.random() * 60 - 30;
-      const rotationAmount = Math.random() * 180 - 90;
-      const scaleChange = Math.random() * 0.4 + 0.8;
-
-      // Apply animation with improved keyframes
-      shape.animate(
-        [
-          { transform: `translate(0, 0) rotate(0deg) scale(1)` },
-          { transform: `translate(${xDistance/2}px, ${yDistance/2}px) rotate(${rotationAmount/2}deg) scale(${scaleChange})` },
-          { transform: `translate(${xDistance}px, ${yDistance}px) rotate(${rotationAmount}deg) scale(1)` },
-          { transform: `translate(${xDistance/2}px, ${-yDistance/2}px) rotate(${-rotationAmount/2}deg) scale(${scaleChange})` },
-          { transform: `translate(0, 0) rotate(0deg) scale(1)` },
-        ],
-        {
-          duration: duration * 1000,
-          iterations: Infinity,
-          easing: 'ease-in-out',
-        }
-      );
-
-      container.appendChild(shape);
-      shapes.push(shape);
-    }
-
-    // Enhanced parallax effect on mouse move with depth perception
-    const handleBackgroundParallax = (e) => {
-      const mouseX = e.clientX / window.innerWidth;
-      const mouseY = e.clientY / window.innerHeight;
-
-      shapes.forEach((shape, index) => {
-        // More pronounced depth effect based on shape size
-        const shapeSize = parseFloat(shape.style.width) || 50;
-        const depth = (1 - (shapeSize / 150)) * 0.3 + 0.05; // Smaller shapes move more
-        const moveX = (mouseX - 0.5) * depth * 100;
-        const moveY = (mouseY - 0.5) * depth * 100;
-
-        shape.style.transform = `translate(${moveX}px, ${moveY}px) rotate(${index * 5}deg)`;
-      });
+    `;
+    
+    const fragmentShaderSource = `
+      precision mediump float;
+      uniform float time;
+      uniform vec2 resolution;
+      uniform vec2 mouse;
+      
+      void main() {
+        vec2 uv = gl_FragCoord.xy / resolution;
+        vec2 center = vec2(0.5, 0.5);
+        vec2 mousePos = mouse.xy / resolution;
+        
+        float dist = length(uv - center);
+        float mouseDist = length(uv - mousePos) * 2.0;
+        
+        float ripple = sin(dist * 20.0 - time * 0.5) * 0.1;
+        float mouseRipple = sin(mouseDist * 8.0 - time * 2.0) * 0.1;
+        
+        float r = 0.05 + 0.05 * sin(time * 0.3 + uv.x * 5.0 + ripple + mouseRipple);
+        float g = 0.05 + 0.05 * cos(time * 0.4 + uv.y * 6.0 + ripple + mouseRipple);
+        float b = 0.05 + 0.03 * sin(time * 0.5 + dist * 10.0 + ripple + mouseRipple);
+        
+        gl_FragColor = vec4(r, g, b, 0.3);
+      }
+    `;
+    
+    // Compile shaders
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, vertexShaderSource);
+    gl.compileShader(vertexShader);
+    
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShader, fragmentShaderSource);
+    gl.compileShader(fragmentShader);
+    
+    // Create program
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+    
+    // Set up buffers
+    const vertices = new Float32Array([
+      -1.0, -1.0,
+       1.0, -1.0,
+      -1.0,  1.0,
+       1.0,  1.0
+    ]);
+    
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    
+    // Get attribute locations
+    const positionLocation = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+    
+    // Get uniform locations
+    const timeLocation = gl.getUniformLocation(program, 'time');
+    const resolutionLocation = gl.getUniformLocation(program, 'resolution');
+    const mouseLocation = gl.getUniformLocation(program, 'mouse');
+    
+    // Set resolution
+    gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+    
+    // Animation loop
+    let mouseX = 0;
+    let mouseY = 0;
+    
+    const onMouseMove = (e) => {
+      mouseX = e.clientX;
+      mouseY = canvas.height - e.clientY;
     };
-
-    window.addEventListener('mousemove', handleBackgroundParallax);
-
+    
+    window.addEventListener('mousemove', onMouseMove);
+    
+    let startTime = performance.now();
+    let animationId;
+    
+    const render = () => {
+      const time = (performance.now() - startTime) * 0.001;
+      
+      gl.uniform1f(timeLocation, time);
+      gl.uniform2f(mouseLocation, mouseX, mouseY);
+      
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      
+      animationId = requestAnimationFrame(render);
+    };
+    
+    render();
+    
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
     return () => {
-      window.removeEventListener('mousemove', handleBackgroundParallax);
-      if (container.parentNode) container.remove();
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(animationId);
+      if (canvas.parentNode) canvas.remove();
     };
   }, [shouldReduceMotion]);
 
@@ -198,6 +518,30 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
       },
     }),
   };
+  
+  // Define social media accounts
+  const socialMediaLinks = [
+    { icon: "github", url: "https://github.com/username", label: "GitHub" },
+    { icon: "linkedin", url: "https://linkedin.com/in/username", label: "LinkedIn" },
+    { icon: "twitter", url: "https://twitter.com/username", label: "Twitter" },
+    { icon: "dribbble", url: "https://dribbble.com/username", label: "Dribbble" }
+  ];
+
+  // Custom cursor
+  const customCursorVariants = {
+    default: {
+      x: cursorPos.x - 16,
+      y: cursorPos.y - 16,
+      scale: 1
+    },
+    hover: {
+      x: cursorPos.x - 30,
+      y: cursorPos.y - 30,
+      scale: 2.5,
+      borderColor: "#EAB308",
+      backgroundColor: "rgba(234, 179, 8, 0.1)",
+    }
+  };
 
   return (
     <section
@@ -205,24 +549,110 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
       id="hero"
       className="relative w-full min-h-[90vh] flex flex-col md:flex-row justify-center items-center px-4 md:px-10 py-16 md:py-28 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300 overflow-hidden"
       onMouseMove={handleMouseMove}
+      onTouchMove={handleTouch}
       style={{ position: 'relative' }}
     >
+      {/* Left Column */}
+      <div className="relative w-full md:w-1/2 flex flex-col items-start justify-center">
+
+      {/* WebGL particles */}
+      {!shouldReduceMotion && particles.map(p => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full pointer-events-none z-10"
+          style={{
+            left: p.x,
+            top: p.y,
+            width: p.size,
+            height: p.size,
+            backgroundColor: p.color,
+            filter: 'blur(1px)',
+          }}
+          animate={{
+            opacity: [0.2, 0.8, 0.2],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 3 + Math.random() * 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      ))}
+
+      {/* Custom cursor */}
+      {!shouldReduceMotion && !isMobile && (
+        <motion.div
+          className="fixed w-8 h-8 rounded-full border-2 border-white mix-blend-difference pointer-events-none z-50"
+          variants={customCursorVariants}
+          animate={hoveredWord ? "hover" : "default"}
+          transition={{ type: "spring", stiffness: 500, damping: 28 }}
+        />
+      )}
+
+      {/* Mouse trail effect */}
+      {!shouldReduceMotion && !isMobile && mouseTrail.map((point, index) => (
+        <motion.div
+          key={point.id}
+          className="fixed pointer-events-none z-50"
+          style={{ 
+            left: point.x, 
+            top: point.y,
+            x: "-50%",
+            y: "-50%"
+          }}
+          initial={{ 
+            opacity: 1, 
+            scale: point.scale
+          }}
+          animate={{ 
+            opacity: 0, 
+            scale: 0,
+            rotate: point.rotation 
+          }}
+          transition={{ duration: 0.8 }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20">
+            <path 
+              d="M10 1L12.2451 6.90983H18.5106L13.1327 10.4459L15.3779 16.3557L10 12.8196L4.62215 16.3557L6.86729 10.4459L1.48944 6.90983H7.75486L10 1Z" 
+              fill="rgba(234, 179, 8, 0.6)" 
+              stroke="rgba(234, 179, 8, 0.8)"
+              strokeWidth="0.5"
+            />
+          </svg>
+        </motion.div>
+      ))}
+
       {/* Enhanced Animated Gradient Background */}
       <motion.div
         className="absolute inset-0 pointer-events-none -z-10"
         style={{
-          background: `
-            radial-gradient(circle at 60% 40%, rgba(234,179,8,0.18) 0%, transparent 60%),
-            radial-gradient(circle at 20% 80%, rgba(255,85,0,0.12) 0%, transparent 50%),
-            linear-gradient(120deg, rgba(251,191,36,0.09) 0%, transparent 100%)
-          `,
+          background: isDarkMode ? 
+            `radial-gradient(circle at 60% 40%, rgba(234,179,8,0.14) 0%, transparent 60%),
+             radial-gradient(circle at 20% 80%, rgba(255,85,0,0.08) 0%, transparent 50%),
+             linear-gradient(120deg, rgba(251,191,36,0.07) 0%, transparent 100%)` :
+            `radial-gradient(circle at 60% 40%, rgba(234,179,8,0.18) 0%, transparent 60%),
+             radial-gradient(circle at 20% 80%, rgba(255,85,0,0.12) 0%, transparent 50%),
+             linear-gradient(120deg, rgba(251,191,36,0.09) 0%, transparent 100%)`,
           maskImage: 'linear-gradient(to bottom, black, transparent)',
           WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)'
         }}
         animate={{
           scale: [1, 1.05, 1],
-          opacity: [0.18, 0.24, 0.18],
-          background: [
+          opacity: [isDarkMode ? 0.14 : 0.18, isDarkMode ? 0.20 : 0.24, isDarkMode ? 0.14 : 0.18],
+          background: isDarkMode ? [
+            `radial-gradient(circle at 60% 40%, rgba(234,179,8,0.14) 0%, transparent 60%),
+            radial-gradient(circle at 20% 80%, rgba(255,85,0,0.08) 0%, transparent 50%),
+            linear-gradient(120deg, rgba(251,191,36,0.07) 0%, transparent 100%)`,
+
+            `radial-gradient(circle at 65% 35%, rgba(234,179,8,0.16) 0%, transparent 65%),
+            radial-gradient(circle at 15% 85%, rgba(255,85,0,0.11) 0%, transparent 55%),
+            linear-gradient(130deg, rgba(251,191,36,0.09) 0%, transparent 100%)`,
+
+            `radial-gradient(circle at 60% 40%, rgba(234,179,8,0.14) 0%, transparent 60%),
+            radial-gradient(circle at 20% 80%, rgba(255,85,0,0.08) 0%, transparent 50%),
+            linear-gradient(120deg, rgba(251,191,36,0.07) 0%, transparent 100%)`
+          ] : [
             `radial-gradient(circle at 60% 40%, rgba(234,179,8,0.18) 0%, transparent 60%),
             radial-gradient(circle at 20% 80%, rgba(255,85,0,0.12) 0%, transparent 50%),
             linear-gradient(120deg, rgba(251,191,36,0.09) 0%, transparent 100%)`,
@@ -238,58 +668,33 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
         }}
         transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
       />
+      {/* Logo rendering - fix orphaned props by wrapping with an element */}
+      {logoInNavbar && (
+        <motion.img
+          src="/src/assets/logo.png"
+          alt="Portfolio Logo"
+          className="w-16 h-16 sm:w-20 sm:h-20 mb-6 drop-shadow-2xl"
+          layoutId="main-logo"
+          initial={{ opacity: 0, x: -40, rotate: -10 }}
+          animate={animationSequence >= 1 ? { opacity: 1, x: 0, rotate: 0 } : { opacity: 0, x: -40, rotate: -10 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={{
+            scale: 1.15,
+            rotate: 5,
+            filter: 'drop-shadow(0 0 20px rgba(234, 179, 8, 0.8))'
+          }}
+          whileTap={{ scale: 0.95, rotate: 0 }}
+          role="img"
+          aria-label="Portfolio Logo"
+        />
+      )}
 
-      {/* Enhanced Floating Gold Accent Shapes */}
-      <motion.div
-        className="absolute left-1/3 top-1/3 w-72 h-40 -translate-x-1/2 -z-10 rounded-full blur-3xl opacity-40 bg-gradient-to-r from-gold to-yellow-300 dark:from-gold/70 dark:to-yellow-400/40"
-        animate={{
-          y: [0, 18, 0],
-          x: [0, -15, 0],
-          opacity: [0.32, 0.20, 0.32],
-          scale: [1, 1.1, 1]
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      <motion.div
-        className="absolute right-1/4 bottom-1/3 w-64 h-32 -z-10 rounded-full blur-3xl opacity-30 bg-gradient-to-r from-orange/60 to-gold/40"
-        animate={{
-          y: [0, -12, 0],
-          x: [0, 10, 0],
-          opacity: [0.25, 0.15, 0.25],
-          scale: [1, 0.9, 1]
-        }}
-        transition={{ duration: 14, delay: 1, repeat: Infinity, ease: 'easeInOut' }}
-      />
-
-      {/* Left Column */}
-      <div className="relative z-10 flex flex-col items-start justify-center gap-6 max-w-xl w-full md:w-1/2 h-full py-12 sm:py-16 md:pr-8 md:items-start md:text-left">
-        {/* Logo with enhanced animation */}
-        {!logoInNavbar && (
-          <motion.img
-            src="/src/assets/Logo.svg"
-            alt="Portfolio Logo"
-            className="w-16 h-16 sm:w-20 sm:h-20 mb-6 drop-shadow-2xl"
-            layoutId="main-logo"
-            initial={{ opacity: 0, x: -40, rotate: -10 }}
-            animate={{ opacity: 1, x: 0, rotate: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{
-              scale: 1.15,
-              rotate: 5,
-              filter: 'drop-shadow(0 0 20px rgba(234, 179, 8, 0.8))'
-            }}
-            whileTap={{ scale: 0.95, rotate: 0 }}
-            role="img"
-            aria-label="Portfolio Logo"
-          />
-        )}
 
         {/* Enhanced Heading with Glitch Effect */}
         <div className="overflow-hidden relative">
           <motion.h1
             initial={{ opacity: 0, y: 60 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
+            animate={animationSequence >= 2 ? { opacity: 1, y: 0 } : { opacity: 0, y: 60 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gold text-left max-w-lg mb-4 leading-tight drop-shadow-lg relative"
           >
@@ -340,7 +745,7 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
           <motion.div
             className="absolute bottom-2 left-0 h-1 bg-gold/50 rounded-full"
             initial={{ width: 0, opacity: 0 }}
-            animate={isInView ? { width: '70%', opacity: 1 } : { width: 0, opacity: 0 }}
+            animate={animationSequence >= 2 ? { width: '70%', opacity: 1 } : { width: 0, opacity: 0 }}
             transition={{ duration: 1.2, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
           />
         </div>
@@ -353,7 +758,7 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
               custom={i}
               variants={subheadingVariants}
               initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
+              animate={animationSequence >= 3 ? 'visible' : 'hidden'}
               className="inline-block mr-1"
               whileHover={{
                 color: i % 3 === 0 ? '#EAB308' : i % 4 === 0 ? '#FF5500' : '',
@@ -366,11 +771,11 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
           ))}
         </div>
 
-        {/* Enhanced Call to Action with Ripple Effect */}
+        {/* Enhanced Call to Action with Ripple Effect and Improved Accessibility */}
         <motion.a
           href="#projects"
           initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={animationSequence >= 4 ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
           transition={{ delay: 0.5, duration: 1, ease: [0.22, 1, 0.36, 1] }}
           className="relative inline-block px-6 py-3 sm:px-8 sm:py-4 border border-gold rounded-full text-gold hover:bg-gold hover:text-background hover:shadow-lg transition-all duration-300 font-semibold text-base sm:text-lg tracking-wide mt-8 overflow-hidden group"
           whileHover={{
@@ -382,7 +787,14 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
             boxShadow: '0 0 30px rgba(234, 179, 8, 0.8)',
           }}
           role="button"
-          aria-label="View Projects"
+          aria-label="Voir les projets"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              e.currentTarget.click();
+            }
+          }}
           onClick={(e) => {
             if (!shouldReduceMotion) {
               const btn = e.currentTarget;
@@ -423,15 +835,16 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
           />
         </motion.a>
 
-        {/* Social Media Icons - New Addition */}
+        {/* Enhanced Social Media Links with Hover Effects */}
         <motion.div
           className="flex gap-4 mt-6"
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          animate={animationSequence >= 5 ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ delay: 1.2, duration: 0.8 }}
         >
         </motion.div>
       </div>
+      {/* End Left Column */}
 
       {/* Right Column with Enhanced Robot 3D Spline */}
       <div className="relative w-full md:w-1/2 h-[320px] sm:h-[400px] md:h-[520px] lg:h-[600px] flex items-center justify-center overflow-hidden group md:pl-8">
@@ -456,14 +869,14 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
             transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
           } : {}}
         >
-          {/* Background glow effect for 3D model */}
+          {/* Background glow effect for 3D model - enhanced for dark mode */}
           <motion.div
             className="absolute w-4/5 h-1/2 left-1/2 bottom-10 -translate-x-1/2 rounded-full blur-3xl bg-gold/20 dark:bg-gold/10 -z-10"
             animate={{
               scale: [1, 1.2, 1],
-              opacity: [0.15, 0.25, 0.15],
+              opacity: [isDarkMode ? 0.12 : 0.15, isDarkMode ? 0.22 : 0.25, isDarkMode ? 0.12 : 0.15],
               background: isDarkMode ?
-                ['rgba(234,179,8,0.1)', 'rgba(234,179,8,0.2)', 'rgba(234,179,8,0.1)'] :
+                ['rgba(234,179,8,0.1)', 'rgba(234,179,8,0.18)', 'rgba(234,179,8,0.1)'] :
                 ['rgba(234,179,8,0.2)', 'rgba(234,179,8,0.3)', 'rgba(234,179,8,0.2)']
             }}
             transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
@@ -530,7 +943,7 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
             {/* Spotlight effect on hover */}
             <motion.div
               className="absolute inset-0 bg-radial-gradient opacity-0 pointer-events-none"
-              animate={hasInteracted ? { opacity: 0.15 } : { opacity: 0 }}
+              animate={hasInteracted ? { opacity: isDarkMode ? 0.2 : 0.15 } : { opacity: 0 }}
               transition={{ duration: 0.5 }}
               style={{
                 background: 'radial-gradient(circle at 50% 50%, rgba(234,179,8,0.3) 0%, transparent 70%)',
@@ -551,13 +964,18 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
                 }}
               />
             </SplineErrorBoundary>
+
+            {/* 3D model accessibility label for screen readers */}
+            <div className="sr-only">
+              Modèle 3D d'un robot interactif qui peut être pivoté en déplaçant votre souris ou en touchant l'écran.
+            </div>
           </div>
 
-          {/* Enhanced Interactive Hint */}
+          {/* Enhanced Interactive Hint with better visibility in dark mode */}
           <AnimatePresence>
             {isSplineLoaded && showInteractHint && !shouldReduceMotion && (
               <motion.div
-                className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center bg-background/80 dark:bg-gray-900/80 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg"
+                className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center bg-background/80 dark:bg-gray-900/80 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg border border-gold/30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
@@ -575,6 +993,33 @@ export default function Hero({ logoInNavbar, isDarkMode }) {
           </AnimatePresence>
         </motion.div>
       </div>
+
+      {/* Added Scroll Indicator for better UX */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 1, 0] }}
+        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+      >
+        <span className="text-subtle mb-2 text-sm">Découvrir plus</span>
+        <motion.div 
+          className="w-5 h-10 border-2 border-subtle rounded-full flex items-start justify-center p-1"
+        >
+          <motion.div 
+            className="w-1 h-2 bg-gold rounded-full"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
+        </motion.div>
+      </motion.div>
+
+      {/* Add Skip to content link for accessibility */}
+      <a 
+        href="#main-content" 
+        className="absolute top-0 left-0 p-3 bg-gold text-background transform -translate-y-full focus:translate-y-0 transition-transform z-50"
+      >
+        Passer au contenu principal
+      </a>
     </section>
   );
 }

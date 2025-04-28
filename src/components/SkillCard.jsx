@@ -15,7 +15,7 @@ function SkillCard({ skill, isDarkMode }) {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className={`rounded-3xl px-8 py-6 text-center font-semibold shadow-lg border border-neutral-300 dark:border-gold/50 relative group bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md text-gray-900 dark:text-gray-50 transition-colors transition-shadow duration-300 overflow-hidden`}
+      className={`rounded-3xl px-8 py-6 text-center font-semibold shadow-lg border border-neutral-300 dark:border-gold/50 relative group bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md text-gray-900 dark:text-gray-50 transition-all duration-300 overflow-hidden`}
       whileHover={{
         scale: 1.05,
         rotateY: 10,
@@ -78,11 +78,7 @@ function SkillCard({ skill, isDarkMode }) {
         />
       </motion.div>
 
-      <div className="text-lg mb-2 text-gold font-bold">{skill.name}</div>
-
-      <div className="text-sm text-gray-600 dark:text-gray-300">
-        {skill.years} {skill.years === 1 ? 'année' : 'années'} d'expérience
-      </div>
+      <div className="block text-lg mb-2 text-gold font-bold line-clamp-2 overflow-hidden h-12">{skill.name}</div>
 
       <motion.div
         className="absolute inset-0 rounded-3xl bg-gradient-to-br from-gold/10 to-transparent opacity-0 -z-10"
