@@ -55,3 +55,20 @@ body {
 /* Add this to ensure smooth transitions */
 transition: 'transform 0.1s ease-out';
 
+:root {
+  --gold: #eab308;
+  --bg-light: #ffffff;
+  --bg-dark: #0f0f0f;
+  --text-light: #f5f5f5;
+  --text-dark: #111111;
+  --shadow: rgba(0, 0, 0, 0.15);
+}
+
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

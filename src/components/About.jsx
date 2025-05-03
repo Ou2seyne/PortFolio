@@ -52,7 +52,7 @@ const qualities = [
   { name: 'Créatif', icon: '✨' },
   { name: 'Souci du détail', icon: '🔍' },
   { name: 'Résolution de problèmes', icon: '🧩' },
-  { name: 'Curieux', icon: '🔆' },  // Ajout d'une qualité
+  { name: 'Curieux', icon: '🔆' },
 ];
 
 const interests = [
@@ -71,7 +71,7 @@ export default function About({ isDarkMode, onOpenContact }) {
 
   const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.2, 0.6, 1], [0.7, 1, 1, 0.9]);
-  
+
   // Parallax effect for background elements
   const parallaxEffect1 = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const parallaxEffect2 = useTransform(scrollYProgress, [0, 1], [0, 100]);
@@ -94,7 +94,7 @@ export default function About({ isDarkMode, onOpenContact }) {
   useEffect(() => {
     const handleScroll = () => {
       const position = window.scrollY + window.innerHeight * 0.6;
-      
+
       const sections = [
         { ref: aboutHeaderRef, id: 'about-header' },
         { ref: timelineRef, id: 'timeline' },
@@ -102,13 +102,13 @@ export default function About({ isDarkMode, onOpenContact }) {
         { ref: interestsRef, id: 'interests' },
         { ref: contactRef, id: 'contact-cta' }
       ];
-      
+
       for (const section of sections) {
         if (section.ref.current) {
           const element = section.ref.current;
           const top = element.offsetTop;
           const bottom = top + element.offsetHeight;
-          
+
           if (position >= top && position <= bottom) {
             setVisibleSection(section.id);
             break;
@@ -116,7 +116,7 @@ export default function About({ isDarkMode, onOpenContact }) {
         }
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -135,7 +135,7 @@ export default function About({ isDarkMode, onOpenContact }) {
     timeline: 'bg-white border border-gray-200',
     divider: 'bg-gradient-to-r from-gold/50 via-gold/30 to-transparent',
   };
-  
+
   // Dark mode specific classes and styles
   const darkModeClasses = {
     sectionBg: 'bg-accent/30',
@@ -150,7 +150,7 @@ export default function About({ isDarkMode, onOpenContact }) {
     timeline: 'bg-accent/70 border border-gold/10',
     divider: 'bg-gradient-to-r from-gold/50 to-transparent',
   };
-  
+
   const themeClasses = isDarkMode ? darkModeClasses : lightModeClasses;
 
   const sectionVariants = {
@@ -173,7 +173,7 @@ export default function About({ isDarkMode, onOpenContact }) {
       {/* Background elements with enhanced animation */}
       <motion.div
         className={`absolute top-0 right-0 w-96 h-96 rounded-full ${isDarkMode ? 'bg-gold/5' : 'bg-gold/3'} blur-3xl -z-10`}
-        style={{ 
+        style={{
           y: parallaxEffect1,
           scale: useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.2, 0.9]),
           opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.5, 0.8, 0.5])
@@ -182,7 +182,7 @@ export default function About({ isDarkMode, onOpenContact }) {
 
       <motion.div
         className={`absolute bottom-40 left-10 w-80 h-80 rounded-full ${isDarkMode ? 'bg-orange/5' : 'bg-orange/3'} blur-3xl -z-10`}
-        style={{ 
+        style={{
           y: parallaxEffect2,
           opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 0.7, 0.4])
         }}
@@ -196,7 +196,7 @@ export default function About({ isDarkMode, onOpenContact }) {
           scale: useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.5, 0.8])
         }}
       />
-      
+
       <motion.div
         className={`absolute top-1/2 right-1/4 w-24 h-24 rounded-full ${isDarkMode ? 'bg-orange/3' : 'bg-orange/5'} blur-lg -z-10`}
         style={{
@@ -225,20 +225,20 @@ export default function About({ isDarkMode, onOpenContact }) {
       />
 
       {/* New decorative elements */}
-      <motion.div 
+      <motion.div
         className="absolute top-20 left-10 w-4 h-4 rounded-full bg-gold/20 blur-sm -z-10"
-        animate={{ 
-          scale: [1, 1.5, 1], 
-          opacity: [0.2, 0.5, 0.2] 
+        animate={{
+          scale: [1, 1.5, 1],
+          opacity: [0.2, 0.5, 0.2]
         }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       />
-      
-      <motion.div 
+
+      <motion.div
         className="absolute bottom-20 right-20 w-3 h-3 rounded-full bg-orange/20 blur-sm -z-10"
-        animate={{ 
-          scale: [1, 1.3, 1], 
-          opacity: [0.2, 0.4, 0.2] 
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2]
         }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
       />
@@ -261,7 +261,7 @@ export default function About({ isDarkMode, onOpenContact }) {
           >
             <span className="inline-block relative">
               À propos de moi
-              <motion.span 
+              <motion.span
                 className="absolute -bottom-2 left-0 h-1.5 bg-gradient-to-r from-gold via-orange to-gold"
                 initial={{ width: 0 }}
                 whileInView={{ width: '100%' }}
@@ -273,7 +273,7 @@ export default function About({ isDarkMode, onOpenContact }) {
           <motion.div
             className="grid md:grid-cols-5 gap-8 items-center"
           >
-            <motion.div 
+            <motion.div
               className="md:col-span-3"
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -283,8 +283,8 @@ export default function About({ isDarkMode, onOpenContact }) {
               <p className={`text-xl md:text-2xl leading-relaxed text-left max-w-3xl mb-6 ${themeClasses.paragraph}`}>
                 Je suis un <span className="text-gold font-bold">designer</span> et <span className="text-gold font-bold">développeur</span> encore en études, passionné par la création d'expériences digitales modernes, minimalistes et animées, alliant design épuré et interactions fluides.
               </p>
-              
-              <motion.p 
+
+              <motion.p
                 className={`text-base md:text-lg leading-relaxed text-left max-w-3xl mb-8 ${themeClasses.secondaryText}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -311,8 +311,8 @@ export default function About({ isDarkMode, onOpenContact }) {
                   >
                     <motion.span
                       className={`relative px-5 py-3 rounded-full ${isDarkMode ? 'bg-accent' : 'bg-gray-100'} ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} text-sm font-medium border ${isDarkMode ? 'border-gold/20' : 'border-gold/30'} inline-flex items-center gap-2.5 cursor-pointer outline-none focus-visible:ring-2 ring-gold/50 transition-all duration-200`}
-                      whileHover={{ 
-                        scale: 1.05, 
+                      whileHover={{
+                        scale: 1.05,
                         boxShadow: "0 0 20px 2px rgba(234,179,8,0.2)",
                         backgroundColor: isDarkMode ? "rgba(234,179,8,0.15)" : "rgba(234,179,8,0.1)"
                       }}
@@ -329,8 +329,8 @@ export default function About({ isDarkMode, onOpenContact }) {
                 ))}
               </motion.div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="md:col-span-2 hidden md:block"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -339,19 +339,19 @@ export default function About({ isDarkMode, onOpenContact }) {
             >
               <div className="relative aspect-square max-w-md mx-auto">
                 {/* Background design elements */}
-                <motion.div 
+                <motion.div
                   className={`absolute h-full w-full top-0 left-0 bg-gradient-to-tr from-gold/5 to-orange/5 rounded-3xl rotate-12`}
                   animate={{ rotate: [12, 8, 12] }}
                   transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
                 />
-                
-                <motion.div 
+
+                <motion.div
                   className={`absolute inset-4 rounded-2xl ${isDarkMode ? 'bg-accent' : 'bg-white'} border ${isDarkMode ? 'border-gold/20' : 'border-gold/30'} shadow-lg overflow-hidden`}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <motion.span 
+                    <motion.span
                       className="text-6xl"
                       initial={{ rotateY: 0 }}
                       whileHover={{ rotateY: 180 }}
@@ -360,35 +360,35 @@ export default function About({ isDarkMode, onOpenContact }) {
                       👨‍💻
                     </motion.span>
                   </div>
-                  
+
                   {/* Enhanced decorative elements inside the box */}
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold/50 to-orange/30"></div>
                   <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-gold/50"></div>
                   <div className="absolute bottom-4 left-4 w-4 h-4 rounded-full bg-orange/30"></div>
-                  
+
                   {/* New decorative elements */}
-                  <motion.div 
+                  <motion.div
                     className="absolute top-4 left-4 w-2 h-2 rounded-full bg-gold/30"
                     animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   />
-                  <motion.div 
+                  <motion.div
                     className="absolute bottom-2 right-2 w-3 h-3 rounded-full bg-orange/30"
                     animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                   />
                   <div className="absolute bottom-0 right-0 w-full h-1 bg-gradient-to-l from-gold/50 to-orange/30"></div>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                   className={`absolute inset-0 rounded-2xl border-2 border-dashed ${isDarkMode ? 'border-gold/40' : 'border-gold/50'} -rotate-3`}
-                  animate={{ 
-                    rotate: [-3, 0, -3], 
+                  animate={{
+                    rotate: [-3, 0, -3],
                     borderColor: [
-                      isDarkMode ? 'rgba(234,179,8,0.4)' : 'rgba(234,179,8,0.5)', 
-                      isDarkMode ? 'rgba(234,179,8,0.6)' : 'rgba(234,179,8,0.7)', 
+                      isDarkMode ? 'rgba(234,179,8,0.4)' : 'rgba(234,179,8,0.5)',
+                      isDarkMode ? 'rgba(234,179,8,0.6)' : 'rgba(234,179,8,0.7)',
                       isDarkMode ? 'rgba(234,179,8,0.4)' : 'rgba(234,179,8,0.5)'
-                    ] 
+                    ]
                   }}
                   transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -408,7 +408,7 @@ export default function About({ isDarkMode, onOpenContact }) {
             <h3 className={`text-3xl font-bold ${themeClasses.heading}`}>
               Mon Parcours
             </h3>
-            
+
             <div className={`flex-grow h-1 ${themeClasses.divider}`}></div>
           </motion.div>
 
@@ -440,7 +440,7 @@ export default function About({ isDarkMode, onOpenContact }) {
             <h3 className={`text-3xl font-bold ${themeClasses.heading}`}>
               Mes Compétences
             </h3>
-            
+
             <div className={`flex-grow h-1 ${themeClasses.divider}`}></div>
           </motion.div>
 
@@ -458,9 +458,9 @@ export default function About({ isDarkMode, onOpenContact }) {
                     ? 'bg-gradient-to-r from-gold to-orange text-white shadow-lg'
                     : `${isDarkMode ? 'bg-accent/80 text-foreground' : 'bg-gray-100/90 text-gray-800'} hover:bg-opacity-80`
                 } ${isDarkMode ? 'border border-gold/20' : 'border border-gold/30'}`}
-                whileHover={{ 
-                  scale: 1.05, 
-                  boxShadow: isDarkMode ? "0 5px 15px rgba(0,0,0,0.2)" : "0 5px 15px rgba(0,0,0,0.1)" 
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: isDarkMode ? "0 5px 15px rgba(0,0,0,0.2)" : "0 5px 15px rgba(0,0,0,0.1)"
                 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -520,7 +520,7 @@ export default function About({ isDarkMode, onOpenContact }) {
             <h3 className={`text-3xl font-bold ${themeClasses.heading}`}>
               Centres d'Intérêt
             </h3>
-            
+
             <div className={`flex-grow h-1 ${themeClasses.divider}`}></div>
           </motion.div>
 
@@ -543,12 +543,13 @@ export default function About({ isDarkMode, onOpenContact }) {
                       <h4 className={`text-lg font-semibold ${isDarkMode ? 'text-foreground' : 'text-gray-800'}`}>
                         {interest.name}
                       </h4>
-                    </div><p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    </div>
+                    <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       {interest.description}
                     </p>
-                    
+
                     {/* Ajout d'un élément visuel pour chaque intérêt */}
-                    <motion.div 
+                    <motion.div
                       className="absolute bottom-3 right-3 w-12 h-12 opacity-20"
                       initial={{ rotate: 0 }}
                       whileHover={{ rotate: 15, scale: 1.2 }}
@@ -570,58 +571,58 @@ export default function About({ isDarkMode, onOpenContact }) {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}  
+          transition={{ duration: 0.8 }}
         >
           {/* Background avec un effet de verre amélioré */}
           <div className={`absolute inset-0 ${isDarkMode ? 'bg-accent/40' : 'bg-white/90'} rounded-3xl border ${isDarkMode ? 'border-gold/20' : 'border-gold/30'} backdrop-blur-md z-0`}>
             <div className="absolute inset-0 bg-gradient-to-br from-gold/10 to-orange/10 opacity-70"></div>
           </div>
-          
+
           {/* Effets lumineux améliorés avec plus de dynamisme */}
-          <motion.div 
+          <motion.div
             className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-40 ${isDarkMode ? 'bg-gold/8' : 'bg-gold/15'} blur-3xl rounded-full`}
-            animate={{ 
-              scale: [1, 1.2, 1], 
-              opacity: isDarkMode ? [0.08, 0.12, 0.08] : [0.15, 0.2, 0.15] 
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: isDarkMode ? [0.08, 0.12, 0.08] : [0.15, 0.2, 0.15]
             }}
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           />
-          
-          <motion.div 
+
+          <motion.div
             className={`absolute bottom-0 right-0 w-32 h-32 ${isDarkMode ? 'bg-orange/8' : 'bg-orange/15'} blur-2xl rounded-full`}
-            animate={{ 
-              scale: [1, 1.1, 1], 
-              x: [0, 10, 0], 
+            animate={{
+              scale: [1, 1.1, 1],
+              x: [0, 10, 0],
               y: [0, -5, 0],
               opacity: isDarkMode ? [0.08, 0.1, 0.08] : [0.15, 0.18, 0.15]
             }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           />
-          
-          <motion.div 
+
+          <motion.div
             className={`absolute top-0 left-10 w-24 h-24 ${isDarkMode ? 'bg-gold/10' : 'bg-gold/15'} blur-xl rounded-full`}
-            animate={{ 
-              scale: [1, 1.15, 1], 
-              x: [0, -5, 0], 
+            animate={{
+              scale: [1, 1.15, 1],
+              x: [0, -5, 0],
               y: [0, 5, 0],
               opacity: isDarkMode ? [0.1, 0.15, 0.1] : [0.15, 0.2, 0.15]
             }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
           />
-          
+
           {/* Nouveaux éléments décoratifs */}
-          <motion.div 
+          <motion.div
             className="absolute top-8 right-8 w-3 h-3 rounded-full bg-gold/40"
             animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.7, 0.4] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           />
-          
-          <motion.div 
+
+          <motion.div
             className="absolute bottom-8 left-8 w-2 h-2 rounded-full bg-orange/40"
             animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0.6, 0.4] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
           />
-          
+
           <div className="relative z-10 flex flex-col items-center">
             <motion.h3
               className={`text-2xl md:text-3xl font-bold mb-6 ${themeClasses.heading}`}
@@ -633,7 +634,7 @@ export default function About({ isDarkMode, onOpenContact }) {
               Prêt à démarrer un projet ensemble ?
             </motion.h3>
 
-            <motion.p 
+            <motion.p
               className={`text-center max-w-xl mb-10 ${themeClasses.secondaryText} text-lg`}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -644,12 +645,12 @@ export default function About({ isDarkMode, onOpenContact }) {
             </motion.p>
 
             <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: 0.4 }}
-      className="flex gap-6"
-    >
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex gap-6"
+            >
               <ContactButton onOpenContact={onOpenContact} />
             </motion.div>
           </div>

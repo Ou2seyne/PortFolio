@@ -10,8 +10,7 @@ function EnhancedAnimatedHeader({ logoInNavbar, activeSection, navItems, isDarkM
   const [showScrollTop, setShowScrollTop] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const headerRef = useRef(null);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
+  
   // Handle dark mode
   useEffect(() => {
     if (isDarkMode) {

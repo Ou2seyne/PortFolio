@@ -668,28 +668,6 @@ export default function HeroV2({ logoInNavbar, isDarkMode }) {
         }}
         transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
       />
-      {/* Logo rendering - fix orphaned props by wrapping with an element */}
-      {logoInNavbar && (
-        <motion.img
-          src="/src/assets/logo.png"
-          alt="Portfolio Logo"
-          className="w-16 h-16 sm:w-20 sm:h-20 mb-6 drop-shadow-2xl"
-          layoutId="main-logo"
-          initial={{ opacity: 0, x: -40, rotate: -10 }}
-          animate={animationSequence >= 1 ? { opacity: 1, x: 0, rotate: 0 } : { opacity: 0, x: -40, rotate: -10 }}
-          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-          whileHover={{
-            scale: 1.15,
-            rotate: 5,
-            filter: 'drop-shadow(0 0 20px rgba(234, 179, 8, 0.8))'
-          }}
-          whileTap={{ scale: 0.95, rotate: 0 }}
-          role="img"
-          aria-label="Portfolio Logo"
-        />
-      )}
-
-
         {/* Enhanced Heading with Glitch Effect */}
         <div className="overflow-hidden relative">
           <motion.h1
@@ -993,33 +971,6 @@ export default function HeroV2({ logoInNavbar, isDarkMode }) {
           </AnimatePresence>
         </motion.div>
       </div>
-
-      {/* Added Scroll Indicator for better UX */}
-      <motion.div 
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
-      >
-        <span className="text-subtle mb-2 text-sm">Découvrir plus</span>
-        <motion.div 
-          className="w-5 h-10 border-2 border-subtle rounded-full flex items-start justify-center p-1"
-        >
-          <motion.div 
-            className="w-1 h-2 bg-gold rounded-full"
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
-        </motion.div>
-      </motion.div>
-
-      {/* Add Skip to content link for accessibility */}
-      <a 
-        href="#main-content" 
-        className="absolute top-0 left-0 p-3 bg-gold text-background transform -translate-y-full focus:translate-y-0 transition-transform z-50"
-      >
-        Passer au contenu principal
-      </a>
     </section>
   );
 }

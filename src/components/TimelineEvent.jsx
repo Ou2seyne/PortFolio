@@ -1,95 +1,220 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function TimelineEvent({ item, idx }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Animation variants
+  const cardVariants = {
+    initial: { 
+      opacity: 0, 
+      x: idx % 2 === 0 ? -50 : 50,
+      y: 20
+    },
+    animate: { 
+      opacity: 1, 
+      x: 0, 
+      y: 0,
+      transition: { 
+        duration: 0.8, 
+        delay: idx * 0.2,
+        ease: [0.6, 0.05, 0.01, 0.99]
+      }
+    },
+    hover: {
+      y: -8,
+      boxShadow: "0 20px 30px -10px rgba(0, 0, 0, 0.3)",
+      transition: { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 20 
+      }
+    }
+  };
+
+  const circleVariants = {
+    initial: { scale: 0 },
+    animate: { 
+      scale: 1, 
+      transition: { 
+        type: "spring", 
+        stiffness: 400, 
+        damping: 10,
+        delay: idx * 0.2 + 0.3
+      }
+    },
+    hover: {
+      scale: 1.2,
+      rotate: [0, 5, -5, 0],
+      boxShadow: "0 0 25px rgba(234, 179, 8, 0.8)",
+      transition: { 
+        type: "spring", 
+        stiffness: 400, 
+        damping: 10 
+      }
+    }
+  };
+
+  // Pulse animation for the timeline dot
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isHovered && !isExpanded) {
+        setIsHovered(true);
+        setTimeout(() => setIsHovered(false), 1000);
+      }
+    }, 5000 + (idx * 1000)); // Stagger the pulse animation
+
+    return () => clearInterval(interval);
+  }, [isHovered, isExpanded, idx]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: idx % 2 === 0 ? -50 : 50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, delay: idx * 0.2 }}
-      className={`relative flex ${idx % 2 === 0 ? 'justify-start md:justify-end' : 'justify-start'} w-full min-h-[180px] py-8`}
-    >
-      {/* Cercle sur la ligne */}
+    <div className="relative group">
+      {/* Timeline line */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-transparent via-gold/30 to-transparent" />
+      
       <motion.div
-  className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 
-             bg-gradient-to-br from-gold to-yellow-400 rounded-full flex items-center justify-center 
-             z-10 border-4 border-white dark:border-neutral-700 cursor-pointer"
-  initial={{ scale: 0 }}
-  whileInView={{ scale: 1 }}
-  whileHover={{
-    scale: 1.4,            // agrandissement léger
-    rotate: [0, 5, -5, 0], // léger "shake" magnétique
-    boxShadow: "0 0 20px rgba(234, 179, 8, 0.7)"
-  }}
-  viewport={{ once: true }}
-  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-  tabIndex={0}
-  aria-label="Expand timeline event"
-  onClick={() => setIsExpanded(!isExpanded)}
-  onKeyDown={e => {
-    if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
-  }}
->
-  <span className="text-lg">{item.icon}</span>
-</motion.div>
-
-      {/* Carte de l'événement */}
-      <motion.div
-        className={`rounded-xl px-8 py-6 shadow-xl border border-neutral-200 dark:border-gold/30 text-left
-                   ${idx % 2 === 0 ? 'md:mr-8' : 'md:ml-8'} mx-auto md:mx-0
-                   relative md:w-[350px] cursor-pointer bg-neutral-50 dark:bg-neutral-800 
-                   text-neutral-800 dark:text-neutral-300 transition-colors transition-shadow duration-300`}
-        onClick={() => setIsExpanded(!isExpanded)}
-        whileHover={{
-          boxShadow: "0 15px 30px -10px rgba(0, 0, 0, 0.2)",
-          y: -5,
-        }}
-        layout
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        className={`relative flex ${idx % 2 === 0 ? 'justify-start md:justify-end' : 'justify-start'} w-full min-h-[200px] py-10`}
       >
-        {/* Badge Année */}
-        <div className="absolute -top-3 left-4 bg-gold px-3 py-1 rounded-full text-sm font-bold text-gray-900 dark:text-gray-100">
-          {item.year}
-        </div>
-
-        <div className="mt-3">
-          <div className="text-gold dark:text-yellow-400 font-semibold text-xl mb-2">{item.title}</div>
-          <p className="text-neutral-800 dark:text-neutral-300 text-base">{item.desc}</p>
-
-          {/* Détails extensibles */}
+        {/* Timeline circle */}
+        <motion.div
+          className="absolute left-1/2 transform -translate-x-1/2 w-14 h-14 
+                    bg-gradient-to-br from-gold to-yellow-400 rounded-full flex items-center justify-center 
+                    z-10 border-4 border-white dark:border-neutral-700 cursor-pointer shadow-lg"
+          variants={circleVariants}
+          whileHover="hover"
+          animate={isHovered ? "hover" : "animate"}
+          tabIndex={0}
+          aria-label="Expand timeline event"
+          onClick={() => setIsExpanded(!isExpanded)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
+          }}
+        >
+          <motion.span 
+            className="text-xl text-white"
+            animate={isExpanded ? { rotateZ: 180 } : { rotateZ: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            {isExpanded ? "×" : item.icon}
+          </motion.span>
+          
+          {/* Pulse effect */}
           <AnimatePresence>
-            {isExpanded && (
+            {(isHovered && !isExpanded) && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="mt-4 pt-4 border-t border-gold/20"
-              >
-                <p className="text-neutral-700 dark:text-neutral-400 mb-3">{item.details}</p>
-              </motion.div>
+                className="absolute w-full h-full rounded-full bg-gold/40"
+                initial={{ scale: 0.8, opacity: 1 }}
+                animate={{ scale: 1.6, opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              />
             )}
           </AnimatePresence>
+        </motion.div>
 
-          {/* Indicateur pour cliquer */}
-          <motion.div
-            className="mt-3 text-gold dark:text-yellow-400 flex items-center gap-1 text-sm"
-            animate={{ y: isExpanded ? 0 : 5, opacity: isExpanded ? 0 : 1 }}
-          >
-            {!isExpanded && (
-              <>
-                Cliquez pour plus de détails
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </>
-            )}
-          </motion.div>
-        </div>
+        {/* Event card */}
+        <motion.div
+          className={`rounded-xl px-8 py-6 shadow-xl border border-neutral-200 dark:border-gold/30 text-left
+                    ${idx % 2 === 0 ? 'md:mr-12' : 'md:ml-12'} mx-auto md:mx-0
+                    relative md:w-[380px] cursor-pointer bg-neutral-50 dark:bg-neutral-800/90 
+                    backdrop-blur-sm text-neutral-800 dark:text-neutral-300 transition-colors duration-300
+                    hover:border-gold/50`}
+          onClick={() => setIsExpanded(!isExpanded)}
+          variants={cardVariants}
+          whileHover="hover"
+          layout
+        >
+          {/* Year badge with gradient */}
+          <div className="absolute -top-3 -left-2 bg-gradient-to-r from-gold to-yellow-500 px-4 py-1.5 
+                         rounded-lg text-sm font-bold text-white shadow-lg transform -rotate-2">
+            {item.year}
+          </div>
+
+          {/* Connection line from timeline to card */}
+          <div className={`absolute top-1/2 transform -translate-y-1/2 ${idx % 2 === 0 ? 'right-0 translate-x-1/2' : 'left-0 -translate-x-1/2'} 
+                          w-12 h-0.5 bg-gradient-to-r from-gold/80 to-transparent ${idx % 2 === 0 ? '' : 'rotate-180'} hidden md:block`} />
+
+          <div className="mt-5">
+            {/* Title with gradient text */}
+            <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-500 
+                          font-bold text-xl mb-3 tracking-tight">
+              {item.title}
+            </h3>
+            
+            <p className="text-neutral-700 dark:text-neutral-300 text-base leading-relaxed">
+              {item.desc}
+            </p>
+
+            {/* Expanded details section */}
+            <AnimatePresence>
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="mt-6 pt-5 border-t border-gold/20"
+                >
+                  <div className="space-y-4">
+                    <p className="text-neutral-700 dark:text-neutral-400 leading-relaxed">
+                      {item.details}
+                    </p>
+                    
+                    {/* Key achievements section - assuming details contains important points */}
+                    {item.keyPoints && (
+                      <div className="mt-4">
+                        <h4 className="font-medium text-gold dark:text-yellow-400 mb-2">Points clés:</h4>
+                        <ul className="list-disc list-inside space-y-1 pl-2 text-sm text-neutral-700 dark:text-neutral-400">
+                          {item.keyPoints.map((point, i) => (
+                            <motion.li 
+                              key={i}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.1 }}
+                            >
+                              {point}
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Click indicator */}
+            <motion.div
+              className="mt-4 text-gold dark:text-yellow-400 flex items-center gap-1.5 text-sm font-medium"
+              animate={{ 
+                y: isExpanded ? 0 : [0, 5, 0], 
+                opacity: isExpanded ? 0 : 1,
+                transition: {
+                  y: {
+                    repeat: isExpanded ? 0 : Infinity,
+                    repeatDelay: 1.5,
+                    duration: 1
+                  }
+                }
+              }}
+            >
+              {!isExpanded && (
+                <>
+                  <span>Voir plus de détails</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </motion.div>
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
 
