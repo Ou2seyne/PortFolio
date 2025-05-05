@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { motion, useScroll } from 'framer-motion';
 import AnimatedHeader from './components/AnimatedHeader';
-import Hero from './components/Hero';
+import HeroEnhanced from './components/HeroEnhanced';
 import About from './components/About';
 import ProjectsGallery from './components/ProjectsGallery';
 import Contact from './components/Contact';
@@ -109,7 +109,10 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
           element={
             <>
               <div id="hero" ref={heroRef} className="w-full">
-                <Hero logoInNavbar={logoInNavbar} isDarkMode={isDarkMode} />
+                <HeroEnhanced
+                  logoInNavbar={logoInNavbar}
+                  isDarkMode={isDarkMode}
+                />
               </div>
               <div id="about" ref={aboutRef} className="w-full pt-24">
                 <About isDarkMode={isDarkMode} onOpenContact={() => setContactModalOpen(true)} />
@@ -141,7 +144,7 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
               onClick={e => e.stopPropagation()}
             >
               <button
-                className="absolute top-4 right-4 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold to-orange shadow-lg border-2 border-white/70 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gold/30 group"
+                className="absolute top-4 right-4 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold to-[#D90429] shadow-lg border-2 border-white/70 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gold/30 group"
                 onClick={() => setContactModalOpen(false)}
                 aria-label="Fermer le formulaire de contact"
                 type="button"

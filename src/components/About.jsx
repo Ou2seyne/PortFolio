@@ -15,6 +15,7 @@ const skills = [
   { name: 'SQL', logo: '/src/assets/skill/sql-file-format-symbol-svgrepo-com.svg', category: 'Backend', proficiency: 90, years: 2 },
   { name: 'Next.js', logo: '/src/assets/skill/nextjs-icon-svgrepo-com.svg', category: 'Frontend', proficiency: 70, years: 0.5 },
   { name: 'Tailwind CSS', logo: '/src/assets/skill/tailwindcss-svgrepo-com.svg', category: 'Frontend', proficiency: 80, years: 1 },
+  { name: 'Framer Motion', logo: '/src/assets/skill/framer-motion-svgrepo-com.svg', category: 'Frontend', proficiency: 80, years: 1 },
 ];
 
 const roadmap = [
@@ -57,9 +58,9 @@ const qualities = [
 
 const interests = [
   { name: 'UI/UX Design', icon: '🎨', color: 'from-pink-500 to-purple-500', description: 'Je me passionne pour la création d\'interfaces utilisateur intuitives et esthétiques, en plaçant l\'expérience utilisateur au centre de mes démarches.' },
-  { name: 'Web Animation', icon: '✨', color: 'from-blue-500 to-cyan-500', description: 'J\'aime donner vie aux interfaces web avec des animations fluides et significatives qui guident l\'utilisateur et apportent une dimension interactive.' },
+  { name: 'Web Animation', icon: '✨', color: 'from-blue-500 to-#D90429', description: 'J\'aime donner vie aux interfaces web avec des animations fluides et significatives qui guident l\'utilisateur et apportent une dimension interactive.' },
   { name: 'Mobile Development', icon: '📱', color: 'from-green-500 to-emerald-500', description: 'Le développement d\'applications mobiles responsive et performantes m\'intéresse particulièrement, avec un focus sur l\'expérience utilisateur.' },
-  { name: 'Minimalist Design', icon: '◻️', color: 'from-amber-500 to-yellow-500', description: 'J\'adopte une approche minimaliste dans mes designs, privilégiant la clarté, la fonctionnalité et l\'élégance à travers la simplicité.' },
+  { name: 'Minimalist Design', icon: '◻️', color: 'from-#D90429 to-#FF4B5C', description: 'J\'adopte une approche minimaliste dans mes designs, privilégiant la clarté, la fonctionnalité et l\'élégance à travers la simplicité.' },
 ];
 
 export default function About({ isDarkMode, onOpenContact }) {
@@ -130,8 +131,8 @@ export default function About({ isDarkMode, onOpenContact }) {
     accent: 'text-gold',
     cardBg: 'bg-white shadow-md',
     badge: 'bg-gray-100 text-gray-800',
-    activeBadge: 'bg-gradient-to-r from-gold to-orange text-white',
-    buttonBg: 'bg-white hover:bg-gray-50',
+    activeBadge: 'bg-gradient-to-r from-gold to-#D90429 text-white',
+    buttonBg: 'bg-white hover:bg-#FFD2D6',
     timeline: 'bg-white border border-gray-200',
     divider: 'bg-gradient-to-r from-gold/50 via-gold/30 to-transparent',
   };
@@ -455,18 +456,16 @@ export default function About({ isDarkMode, onOpenContact }) {
                 onClick={() => setActiveCategory(category)}
                 className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
                   activeCategory === category
-                    ? 'bg-gradient-to-r from-gold to-orange text-white shadow-lg'
-                    : `${isDarkMode ? 'bg-accent/80 text-foreground' : 'bg-gray-100/90 text-gray-800'} hover:bg-opacity-80`
-                } ${isDarkMode ? 'border border-gold/20' : 'border border-gold/30'}`}
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: isDarkMode ? "0 5px 15px rgba(0,0,0,0.2)" : "0 5px 15px rgba(0,0,0,0.1)"
-                }}
-                whileTap={{ scale: 0.95 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 + index * 0.05 }}
-              >
+                  ? isDarkMode
+                  ? 'bg-customyellow/20 text-customyellow border border-customyellow/30'
+                  : 'bg-customyellow text-white border-2 border-customyellow shadow-md'
+                : isDarkMode
+                  ? 'bg-neutral-800 text-gray-300 border border-neutral-700 hover:bg-neutral-700'
+                  : 'bg-white text-gray-700 border border-customyellow hover:bg-gray-50'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
                 {category}
               </motion.button>
             ))}

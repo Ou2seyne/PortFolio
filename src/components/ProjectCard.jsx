@@ -1,39 +1,106 @@
 import React, { useState, forwardRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useAnimation, useScroll, useTransform } from 'framer-motion';
 
 const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, isDarkMode }, ref) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-
+  
+  // Add useInView hook for scroll-triggered animations
+  const cardRef = React.useRef(null);
+  const isInView = useInView(cardRef, { once: false, amount: 0.3 });
+  const controls = useAnimation();
+  
+  // Add parallax effect on scroll
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const imageY = useTransform(scrollYProgress, [0, 1], [20, -20]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.9, 1], [0.6, 1, 1, 0.6]);
 
   useEffect(() => {
     const img = new Image();
     img.src = project.image || '/api/placeholder/400/225';
     img.onload = () => setIsImageLoaded(true);
   }, [project.image]);
+  
+  // Control animations based on viewport visibility
+  useEffect(() => {
+    if (isInView) {
+      controls.start("visible");
+    } else {
+      controls.start("hidden");
+    }
+  }, [controls, isInView]);
 
   const interactionState = isHovered || isFocused;
+  
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        delay: priority * 0.08,
+        ease: [0.25, 0.1, 0.25, 1],
+        when: "beforeChildren",
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const childVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+  
+  const tagVariants = {
+    hidden: { y: -10, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { duration: 0.3, delay: 0.2 }
+    }
+  };
 
   return (
     <motion.div
-      ref={ref}
+      ref={(el) => {
+        // Combine the forwarded ref with our local ref
+        if (ref) {
+          if (typeof ref === 'function') ref(el);
+          else ref.current = el;
+        }
+        cardRef.current = el;
+      }}
       layoutId={`project-${project.title}`}
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      variants={cardVariants}
+      initial="hidden"
+      animate={controls}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{
-        duration: 0.5,
-        delay: priority * 0.08,
         layout: { duration: 0.4, type: 'spring', stiffness: 120, damping: 18 },
       }}
       className={`relative rounded-xl overflow-hidden border transition-all duration-300 cursor-pointer
         ${isDarkMode
-          ? `border-neutral-800 bg-neutral-900/40 backdrop-blur-sm ${interactionState ? 'border-gold/70 shadow-[0_4px_32px_0_rgba(234,179,8,0.18)]' : ''}`
-          : `border-gray-200 bg-white/40 backdrop-blur-sm ${interactionState ? 'border-blue-400 shadow-[0_4px_32px_0_rgba(37,99,235,0.13)]' : ''}`
+          ? `border-neutral-800 bg-neutral-900/40 backdrop-blur-sm ${interactionState ? 'border-[#A3001A]/70 shadow-[0_4px_32px_0_rgba(217,4,41,0.18)]' : ''}`
+          : `border-gray-200 bg-white/40 backdrop-blur-sm ${interactionState ? 'border-[#D90429]/70 shadow-[0_4px_32px_0_rgba(217,4,41,0.13)]' : ''}`
         }
         transform-gpu hover:scale-[1.02] focus-within:scale-[1.02]`}
       whileTap={{ scale: 0.975 }}
+      whileHover={{
+        y: -5,
+        transition: { duration: 0.2, ease: "easeOut" }
+      }}
       role="button"
       tabIndex={0}
       aria-label={`Voir les détails pour ${project.title}`}
@@ -100,18 +167,22 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
           style={{
             opacity: isImageLoaded ? 1 : 0,
             transform: interactionState ? 'scale(1.05)' : 'scale(1)',
+            y: isInView ? imageY : 0,
             willChange: 'transform',
           }}
+          transition={{ duration: 0.4 }}
         />
         <motion.div
-          className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"
+          className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-[#D90429] transparent"
           initial={{ opacity: 0.6 }}
           animate={{ opacity: interactionState ? 0.75 : 0.6 }}
+          style={{ opacity }}
         />
       </div>
 
       {/* Tag Badge */}
       <motion.div
+        variants={tagVariants}
         className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium z-10 ${
           isDarkMode 
             ? 'bg-neutral-900/90 text-gold border border-gold/30' 
@@ -119,24 +190,30 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
         }`}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        initial={{ y: -10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: priority * 0.08 + 0.2 }}
       >
         {project.tag}
       </motion.div>
 
       {/* Content */}
       <div className="p-5 relative z-10">
-        <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+        <motion.h3 
+          variants={childVariants}
+          className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+        >
           {project.title}
-        </h3>
-        <p className={`mb-4 line-clamp-2 text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        </motion.h3>
+        <motion.p 
+          variants={childVariants}
+          className={`mb-4 line-clamp-2 text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}
+        >
           {project.description}
-        </p>
+        </motion.p>
         
         {/* Tech stack */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <motion.div 
+          variants={childVariants}
+          className="flex flex-wrap gap-2 mb-4"
+        >
           <AnimatePresence>
             {project.tools.map((tool, index) => (
               <motion.span
@@ -144,7 +221,7 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ delay: index * 0.05 + priority * 0.08 }}
+                transition={{ delay: index * 0.05 }}
                 className={`text-xs px-2 py-1 rounded-md ${
                   isDarkMode 
                     ? 'bg-neutral-800 text-gray-300 border-neutral-700' 
@@ -159,14 +236,12 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
               </motion.span>
             ))}
           </AnimatePresence>
-        </div>
+        </motion.div>
         
         {/* Actions */}
         <motion.div
+          variants={childVariants}
           className="flex justify-between items-center"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: priority * 0.08 + 0.3 }}
         >
           <motion.button
             onClick={onClick}
@@ -217,11 +292,11 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
         </motion.div>
       </div>
       
-      {/* Bottom highlight line */}
+      {/* Bottom highlight line with animation */}
       <motion.div 
         className={`absolute bottom-0 left-0 h-1 ${isDarkMode ? 'bg-gold' : 'bg-blue-500'} origin-left`}
         initial={{ scaleX: 0 }}
-        animate={{ scaleX: interactionState ? 1 : 0 }}
+        animate={{ scaleX: interactionState ? 1 : isInView ? 0.3 : 0 }}
         transition={{ duration: 0.4 }}
       />
       

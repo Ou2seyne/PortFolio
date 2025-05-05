@@ -11,7 +11,6 @@ module.exports = {
         accent: '#121212',      // Darker accent for sections if needed
         subtle: '#2a2a2a',      // Slightly lighter than background
         gold: '#fbbf24',         // Gold
-        orange: '#fb923c',       // Orange
         link: '#fbbf24',         // Links are gold too
         customyellow: '#eec745',
         grandiant: '#fefcf4',

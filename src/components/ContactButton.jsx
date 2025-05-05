@@ -43,7 +43,7 @@ const ContactButton = ({ onOpenContact }) => {
       <motion.a
         href="#contact"
         onClick={handleClick}
-        className={`px-8 py-4 rounded-xl bg-gradient-to-r from-gold to-orange text-white font-medium 
+        className={`px-8 py-4 rounded-xl bg-gradient-to-r from-gold to-orange-500 text-white font-medium 
                   shadow-lg shadow-gold/30 flex items-center gap-2.5 hover:shadow-xl hover:shadow-gold/40 
                   transition-all duration-300 relative overflow-hidden group`}
         whileHover={{ scale: 1.05, boxShadow: '0 10px 25px rgba(234,179,8,0.4)' }}
@@ -73,7 +73,7 @@ const ContactButton = ({ onOpenContact }) => {
             clipRule="evenodd"
           />
         </motion.svg>
-        <span className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-gold to-orange opacity-0 group-hover:opacity-30 group-hover:animate-pulse blur-sm"></span>
+        <span className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-gold to-[#D90429] opacity-0 group-hover:opacity-30 group-hover:animate-pulse blur-sm"></span>
       </motion.a>
     </motion.div>
   );

@@ -59,7 +59,7 @@ const MenuToggle = ({ toggle, isOpen, isDarkMode }) => (
     className={`flex justify-center items-center rounded-full w-12 h-12 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 ${
       isDarkMode 
         ? isOpen ? 'bg-gold text-black' : 'bg-zinc-800/80 text-gold' 
-        : isOpen ? 'bg-gold text-black' : 'bg-amber-50 text-gold'
+        : isOpen ? 'bg-gold text-black' : 'bg-[#FFD2D6] text-gold'
     } transition-colors duration-300`}
     whileTap={{ scale: 0.9 }}
     aria-label={isOpen ? 'Close menu' : 'Open menu'}
@@ -113,7 +113,7 @@ function MobileMenu({ menuOpen, setMenuOpen, isDarkMode, navItems, activeSection
             className={`absolute top-full left-0 right-0 ${
               isDarkMode 
                 ? scrolled ? 'bg-zinc-900/95' : 'bg-zinc-800/95' 
-                : scrolled ? 'bg-white/95' : 'bg-amber-50/95'
+                : scrolled ? 'bg-white/95' : 'bg-[#FFD2D6]/95'
             } backdrop-blur-xl border-t ${
               isDarkMode ? 'border-gold/20' : 'border-amber-200/50'
             } flex flex-col items-stretch py-6 z-50 overflow-hidden`}
@@ -329,7 +329,7 @@ function EnhancedMobileSocialIcons({ isDarkMode, shouldReduceMotion }) {
           {/* Icon with circle background */}
           <motion.div 
             className={`relative z-10 p-4 rounded-full ${
-              isDarkMode ? 'bg-zinc-800' : 'bg-amber-50'
+              isDarkMode ? 'bg-zinc-800' : 'bg-[#FFD2D6]'
             } border ${
               isDarkMode ? 'border-gold/30' : 'border-gold/50'
             }`}
