@@ -15,7 +15,6 @@ const skills = [
   { name: 'SQL', logo: '/src/assets/skill/sql-file-format-symbol-svgrepo-com.svg', category: 'Backend', proficiency: 90, years: 2 },
   { name: 'Next.js', logo: '/src/assets/skill/nextjs-icon-svgrepo-com.svg', category: 'Frontend', proficiency: 70, years: 0.5 },
   { name: 'Tailwind CSS', logo: '/src/assets/skill/tailwindcss-svgrepo-com.svg', category: 'Frontend', proficiency: 80, years: 1 },
-  { name: 'Framer Motion', logo: '/src/assets/skill/framer-motion-svgrepo-com.svg', category: 'Frontend', proficiency: 80, years: 1 },
 ];
 
 const roadmap = [

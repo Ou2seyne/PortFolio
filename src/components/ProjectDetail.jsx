@@ -202,7 +202,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
         className={`rounded-2xl overflow-hidden w-full max-w-5xl relative z-10 shadow-2xl border ${
           isDarkMode 
             ? 'border-gold/40 shadow-gold/10' 
-            : 'border-gray-200 shadow-blue-500/5'
+            : 'border-gray-200 shadow-customyellow/5'
         } max-h-[90vh] flex flex-col md:flex-row`}
       >
         {/* Progress indicator at top with enhanced animation */}
@@ -210,7 +210,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
           className={`absolute top-0 left-0 h-1 ${
             isDarkMode 
               ? 'bg-gradient-to-r from-gold via-amber-500 to-gold' 
-              : 'bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600'
+              : 'bg-gradient-to-r from-customyellow via-indigo-500 to-customyellow'
           }`}
           variants={progressBarVariants}
           style={{
@@ -225,7 +225,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
           className={`absolute top-4 right-4 z-20 p-2 rounded-full 
             ${isDarkMode 
               ? 'bg-neutral-800/90 text-gold hover:bg-neutral-700 focus:ring-gold/50' 
-              : 'bg-white/90 text-gray-700 hover:bg-gray-100 focus:ring-blue-400/50'
+              : 'bg-white/90 text-gray-700 hover:bg-gray-100 focus:ring-customyellow/50'
             } 
             backdrop-blur-sm shadow-lg transition-all focus:outline-none focus:ring-2`}
           whileHover={{ 
@@ -256,7 +256,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
           }`}
           variants={childVariants}
         >
-          <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-gold' : 'text-blue-600'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-customyellow' : 'text-black'}`}>
             Détails du projet
           </h3>
           
@@ -264,8 +264,8 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
             <motion.span
               className={`px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1.5
                 ${isDarkMode 
-                  ? 'bg-gold/20 text-gold border border-gold/30' 
-                  : 'bg-blue-100 text-blue-600 border border-blue-200'
+                  ? 'bg-customyellow/20 text-customyellow border border-customyellow/30' 
+                  : 'bg-customyellow/20 text-customyellow border border-customyellow/30'
                 }`}
               initial={{ opacity: 0, y: 8 }}
               animate={{ 
@@ -287,7 +287,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
               }}
             >
               <motion.span 
-                className={`w-2 h-2 rounded-full ${isDarkMode ? 'bg-gold' : 'bg-blue-500'}`}
+                className={`w-2 h-2 rounded-full ${isDarkMode ? 'bg-gold' : 'bg-customyellow'}`}
                 animate={{ 
                   scale: [1, 1.5, 1],
                   opacity: [1, 0.7, 1]
@@ -325,7 +325,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`h-3 w-3 ${isDarkMode ? 'text-gold' : 'text-blue-500'}`}
+                    className={`h-3 w-3 ${isDarkMode ? 'text-gold' : 'text-customyellow'}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -345,7 +345,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
             className={`inline-flex px-4 py-2 rounded-md font-medium items-center gap-2 
               ${isDarkMode 
                 ? 'bg-gold text-neutral-900 hover:bg-gold/90 focus:ring-gold/50' 
-                : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-400/50'
+                : 'bg-customyellow text-white hover:bg-customyellow/90 focus:ring-customyellow/50'
               } 
               shadow-md focus:outline-none focus:ring-2 transition-all duration-200`}
             variants={childVariants}
@@ -470,7 +470,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
             <motion.h2
               id={`modal-title-${project.title}`}
               className={`text-2xl sm:text-3xl font-bold mb-4 ${
-                isDarkMode ? 'text-gold' : 'text-blue-800'
+                isDarkMode ? 'text-gold' : 'text-customyellow'
               }`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ 
@@ -508,7 +508,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
             </motion.p>
             
             <motion.h3 
-              className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gold' : 'text-blue-700'}`}
+              className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gold' : 'text-customyellow'}`}
               initial={{ opacity: 0, y: 15 }}
               animate={{ 
                 opacity: 1, 
@@ -585,7 +585,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: false, amount: 0.2 }}
               >
-                <h3 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gold' : 'text-blue-700'}`}>
+                <h3 className={`text-lg font-semibold mb-3 ${isDarkMode ? 'text-gold' : 'text-customyellow'}`}>
                   Fonctionnalités clés
                 </h3>
                 <ul className={`list-disc ml-5 space-y-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -629,10 +629,10 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                   className={`inline-flex px-4 py-2 rounded-md font-medium items-center gap-2 
                     ${isDarkMode 
                       ? 'bg-gold text-neutral-900 hover:bg-gold/90' 
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-customyellow text-white hover:bg-customyellow/90'
                     } 
                     focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                      isDarkMode ? 'focus:ring-gold' : 'focus:ring-blue-500'
+                      isDarkMode ? 'focus:ring-gold' : 'focus:ring-customyellow'
                     }`}
                   whileHover={{ 
                     scale: 1.05, 

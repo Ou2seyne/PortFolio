@@ -6,16 +6,24 @@ import {
   useScroll,
   useTransform,
   useInView,
-  useSpring
+  useSpring,
+  LayoutGroup
 } from 'framer-motion';
+import { Filter, Search } from 'lucide-react';
 import allProjects from './projectsData';
 import ProjectDetail from './ProjectDetail';
 
-// Optimized transitions
+// Dynamically import all images in assets/images using Vite's import.meta.glob
+const imagesMap = Object.fromEntries(
+  Object.entries(import.meta.glob('../assets/images/*', { eager: true })).map(([path, mod]) => [path.split('/').pop(), mod.default])
+);
+
+// Enhanced transitions for smoother animations
 const springTransition = {
   type: "spring",
-  stiffness: 300,
-  damping: 30
+  stiffness: 400,
+  damping: 30,
+  mass: 1
 };
 
 const smoothTransition = {
@@ -24,13 +32,18 @@ const smoothTransition = {
   duration: 0.6
 };
 
-// Animation variants
+// Enhanced animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
     transition: smoothTransition
+  },
+  exit: {
+    opacity: 0,
+    y: 30,
+    transition: { duration: 0.4 }
   }
 };
 
@@ -45,10 +58,24 @@ const staggerContainer = {
   }
 };
 
-// Reusable ProjectCard component to avoid duplication
+// Enhanced floating animation for idle cards
+const floatingAnimation = {
+  y: [0, -5, 0],
+  transition: {
+    duration: 3,
+    ease: "easeInOut",
+    repeat: Infinity
+  }
+};
+
+// Enhanced ProjectCard with interactive features and animations
 const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, cardVariants, isGridView }) => {
   const cardRef = useRef(null);
   const isInView = useInView(cardRef, { once: true, amount: 0.2 });
+  const [isHovering, setIsHovering] = useState(false);
+  
+  // Progressive loading animation for images
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <motion.div
@@ -65,28 +92,32 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
         isDarkMode
           ? 'bg-neutral-900 hover:bg-neutral-800 border border-neutral-800'
           : 'bg-white hover:bg-gray-50'
-      } ${isGridView ? '' : 'md:col-span-2 lg:col-span-3'}`}
+      } ${isGridView ? '' : 'md:col-span-2 lg:col-span-3'} `}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
     >
       <div className="h-full flex flex-col group cursor-pointer" onClick={() => handleOpenModal(project)}>
         <div className="relative h-40 overflow-hidden">
           <div className={`absolute inset-0 z-10 opacity-70 ${project.color}`}></div>
+          
+          {/* Favorite button with enhanced animations */}
           <div className={`absolute top-2 right-2 z-30`}>
             <motion.button
               onClick={(e) => toggleFavorite(e, project.id || project.title)}
               className="p-1.5 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-colors text-white"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.8, rotate: -10 }}
               aria-label={`Toggle favorite for ${project.title}`}
             >
               <motion.svg
                 className={`w-4 h-4 transition-all ${
-                  project.isFavorite ? 'text-[#D90429] fill-[#D90429]' : 'text-white'
+                  project.isFavorite ? 'text-customyellow fill-customyellow' : 'text-white'
                 }`}
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={project.isFavorite ? 0 : 1.5}
-                animate={project.isFavorite ? { scale: [1, 1.2, 1] } : {}}
-                transition={{ duration: 0.3 }}
+                animate={project.isFavorite ? { scale: [1, 1.3, 1], rotate: [0, 15, 0] } : {}}
+                transition={{ duration: 0.4 }}
               >
                 <path
                   strokeLinecap="round"
@@ -96,14 +127,32 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
               </motion.svg>
             </motion.button>
           </div>
+
+          {/* Enhanced image loading with skeleton */}
+          {/* Skeleton loader only when image is not loaded */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse z-10"></div>
+          )}
           <motion.img
-            src={project.image || `https://picsum.photos/600/400?random=${project.id || i}`}
+            src={
+              project.image && project.image.startsWith('http')
+                ? project.image
+                : project.image && imagesMap[project.image.replace(/^.*[\\\/]/, '')]
+                  ? imagesMap[project.image.replace(/^.*[\\\/]/, '')]
+                  : `https://picsum.photos/600/400?random=${project.id || i}`
+            }
             alt={project.title}
-            className="w-full h-full object-cover object-center"
-            whileHover={{ scale: 1.05 }}
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImageLoaded(true)}
+            initial={{ scale: 1.1 }}
+            animate={{ scale: isHovering ? 1.1 : 1 }}
             transition={{ duration: 0.7 }}
+            style={{ zIndex: 20 }}
           />
+          
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent z-20"></div>
+          
+          {/* Status badge with enhanced animation */}
           <div className="absolute bottom-2 left-3 flex items-center gap-1.5 z-20">
             <motion.span
               className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -148,11 +197,24 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 + index * 0.1 }}
+                whileHover={{ scale: 1.1, backgroundColor: isDarkMode ? '#3a3a3a' : '#f3f4f6' }}
               >
                 {tool}
               </motion.span>
             ))}
           </div>
+
+          {/* View button only appears on hover */}
+          <motion.button
+            className={`mt-4 w-full py-2 rounded-lg font-medium text-center ${
+              isDarkMode ? 'bg-neutral-800 text-white hover:bg-neutral-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+            } transition-colors`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: isHovering ? 1 : 0, y: isHovering ? 0 : 10 }}
+            transition={{ duration: 0.2 }}
+          >
+            Voir les détails
+          </motion.button>
         </div>
       </div>
     </motion.div>
@@ -167,20 +229,28 @@ function ProjectsGallery({ isDarkMode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [favoriteProjects, setFavoriteProjects] = useState(() => {
-  const stored = typeof window !== 'undefined' ? localStorage.getItem('favoriteProjects') : null;
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('favoriteProjects') : null;
     return stored ? JSON.parse(stored) : [];
-});
+  });
   const [stats, setStats] = useState({
     totalProjects: 0,
     completedProjects: 0,
     techsUsed: 0,
     totalViews: 0
   });
+  const [recentlyViewed, setRecentlyViewed] = useState(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('recentlyViewedProjects') : null;
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [scrollProgress, setScrollProgress] = useState(0);
+  
   const prefersReducedMotion = useReducedMotion();
   const searchInputRef = useRef(null);
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
   const statsRef = useRef(null);
+  const filtersRef = useRef(null);
+  const scrollYRef = useRef(0);
 
   // Animation hooks for scroll-triggered effects
   const { scrollYProgress } = useScroll({
@@ -188,8 +258,18 @@ function ProjectsGallery({ isDarkMode }) {
     offset: ["start end", "end start"]
   });
 
+  // Update scroll position for parallax effects
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.onChange(v => {
+      setScrollProgress(v);
+      scrollYRef.current = v;
+    });
+    return () => unsubscribe();
+  }, [scrollYProgress]);
+
   const headerInView = useInView(headerRef, { once: true, amount: 0.3 });
   const statsInView = useInView(statsRef, { once: true, amount: 0.3 });
+  const filtersInView = useInView(filtersRef, { once: true, amount: 0.3 });
 
   // Spring-based animation for smoother scroll effects
   const smoothScrollYProgress = useSpring(scrollYProgress, {
@@ -198,27 +278,48 @@ function ProjectsGallery({ isDarkMode }) {
     restDelta: 0.001
   });
 
-  // Transform values based on scroll position
+  // Transform values based on scroll position for parallax effects
   const galleryOpacity = useTransform(smoothScrollYProgress, [0, 0.1], [0.6, 1]);
   const galleryScale = useTransform(smoothScrollYProgress, [0, 0.1], [0.98, 1]);
+  const headerY = useTransform(smoothScrollYProgress, [0, 0.3], [50, 0]);
+  const headerOpacity = useTransform(smoothScrollYProgress, [0, 0.2], [0.5, 1]);
 
   useEffect(() => {
     if (modalProject) return;
-    return () => {};
   }, [modalProject]);
 
+  // Enhanced keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Search shortcut
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         searchInputRef.current?.focus();
+      }
+      
+      // ESC to close modal
+      if (e.key === 'Escape' && modalProject) {
+        handleCloseModal();
+      }
+      
+      // Grid/List view toggle
+      if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+        e.preventDefault();
+        setIsGridView(prev => !prev);
+      }
+      
+      // Toggle favorites
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        setShowOnlyFavorites(prev => !prev);
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isGridView, showOnlyFavorites, modalProject]);
 
+  // Load data with simulated delay for loading state
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -244,6 +345,14 @@ function ProjectsGallery({ isDarkMode }) {
     }
   }, [favoriteProjects]);
 
+  // Save recently viewed to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && recentlyViewed.length) {
+      localStorage.setItem('recentlyViewedProjects', JSON.stringify(recentlyViewed));
+    }
+  }, [recentlyViewed]);
+
+  // Enhanced project data with improved descriptions and animations
   const enhancedProjects = useMemo(() => allProjects.map(project => ({
     ...project,
     longDesc: project.longDesc || `Ce projet ${project.title} représente une solution innovante dans le domaine ${project.tag?.toLowerCase() || 'technologique'}.
@@ -257,58 +366,81 @@ function ProjectsGallery({ isDarkMode }) {
            'from-gray-500/30 to-gray-600/30 dark:from-gray-900/40 dark:to-gray-700/40',
     status: project.status || (Math.random() > 0.2 ? 'completed' : 'in-progress'),
     views: project.views || Math.floor(Math.random() * 500),
-  })), [allProjects]);
+    lastViewed: recentlyViewed.includes(project.id || project.title) ? new Date().toISOString() : null,
+  })), [allProjects, recentlyViewed]);
 
   const tags = ['Tous', 'Site Web', 'Application Web', 'E-Commerce'];
 
   const toggleFavorite = useCallback((e, projectId) => {
     e.stopPropagation();
     setFavoriteProjects(prev => {
-      if (prev.includes(projectId)) {
-        return prev.filter(id => id !== projectId);
-      } else {
-        return [...prev, projectId];
-      }
+      const newFavorites = prev.includes(projectId)
+        ? prev.filter(id => id !== projectId)
+        : [...prev, projectId];
+      
+      return newFavorites;
     });
   }, []);
 
-  const filteredProjects = useMemo(() => enhancedProjects
-    .filter(project => selectedTag === 'Tous' || project.tag === selectedTag)
-    .filter(project =>
-      searchQuery === '' ||
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.tools?.some(tool => tool.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
-    .filter(project => !showOnlyFavorites || favoriteProjects.includes(project.id || project.title))
-    .map(project => ({
-      ...project,
-      isFavorite: favoriteProjects.includes(project.id || project.title)
-    })), [enhancedProjects, selectedTag, searchQuery, showOnlyFavorites, favoriteProjects]);
+  // Enhanced project filtering with sorting options
+  const filteredProjects = useMemo(() => {
+    let projects = enhancedProjects
+      .filter(project => selectedTag === 'Tous' || project.tag === selectedTag)
+      .filter(project =>
+        searchQuery === '' ||
+        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.tools?.some(tool => tool.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+      .filter(project => !showOnlyFavorites || favoriteProjects.includes(project.id || project.title))
+      .map(project => ({
+        ...project,
+        isFavorite: favoriteProjects.includes(project.id || project.title),
+        isRecent: recentlyViewed.includes(project.id || project.title)
+      }));
+    
+    // Sort by recently viewed first, then by favorites
+    projects.sort((a, b) => {
+      
+      // Recently viewed second
+      if (a.isRecent && !b.isRecent) return -1;
+      if (!a.isRecent && b.isRecent) return 1;
+      
+      // Favorites third
+      if (a.isFavorite && !b.isFavorite) return -1;
+      if (!a.isFavorite && b.isFavorite) return 1;
+      
+      return 0;
+    });
+    
+    return projects;
+  }, [enhancedProjects, selectedTag, searchQuery, showOnlyFavorites, favoriteProjects, recentlyViewed]);
 
   const handleOpenModal = useCallback((project) => {
     setModalProject(project);
+    
+    // Add to recently viewed
+    setRecentlyViewed(prev => {
+      const newRecent = [project.id || project.title, ...prev.filter(id => id !== (project.id || project.title))].slice(0, 5);
+      return newRecent;
+    });
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setModalProject(null);
   }, []);
 
+  // Control body scroll when modal is open
   useEffect(() => {
     if (modalProject) {
       document.body.style.overflow = 'hidden';
-      const handleKeyDown = (e) => {
-        if (e.key === 'Escape') handleCloseModal();
-      };
-      window.addEventListener('keydown', handleKeyDown);
       return () => {
-        window.removeEventListener('keydown', handleKeyDown);
         document.body.style.overflow = '';
       };
     } else {
       document.body.style.overflow = '';
     }
-  }, [modalProject, handleCloseModal]);
+  }, [modalProject]);
 
   // Card variants with staggered animations
   const cardVariants = {
@@ -331,281 +463,500 @@ function ProjectsGallery({ isDarkMode }) {
     },
   };
 
-  // Animations disabled if user prefers reduced motion
-  const animationSettings = prefersReducedMotion ? { animate: "visible" } : {};
+  // Enhanced empty state with animation
+  const EmptyState = ({ 
+    showOnlyFavorites = false, 
+    favoriteProjects = [], 
+    searchQuery = '', 
+    setShowOnlyFavorites = () => {}, 
+    setSelectedTag = () => {}, 
+    setSearchQuery = () => {} 
+  }) => {
+    // Defensive guards for undefined/null
+    const safeFavorites = Array.isArray(favoriteProjects) ? favoriteProjects : [];
+    const safeSearch = typeof searchQuery === 'string' ? searchQuery : '';
+
+    const [hoverButton, setHoverButton] = useState(false);
+    
+    // Animation variants
+    const containerVariants = {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.12
+        }
+      }
+    };
+
+    const itemVariants = {
+      hidden: { opacity: 0, y: 20 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+          duration: 0.5
+        }
+      }
+    };
+
+    const Particles = () => {
+      return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"
+              initial={{ 
+                x: `${50 + (Math.random() * 10 - 5)}%`, 
+                y: '60%', 
+                opacity: 0.3 + Math.random() * 0.4 
+              }}
+              animate={{
+                x: `${50 + (Math.sin(i) * 30)}%`,
+                y: ['60%', '20%', '60%'],
+                opacity: [0.3 + Math.random() * 0.4, 0.8, 0.2]
+              }}
+              transition={{
+                duration: 4 + i * 0.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+                delay: i * 0.2
+              }}
+              style={{
+                scale: 0.5 + Math.random() * 1
+              }}
+            />
+          ))}
+        </div>
+      );
+    };
+    
+    // Dynamic illustration based on filter context
+    const IllustrationElement = () => {
+      // Show different illustrations based on filters
+      if (showOnlyFavorites && favoriteProjects.length === 0) {
+        return (
+          <motion.div 
+            className="relative mb-8"
+            animate={{ 
+              rotate: [0, -3, 3, -2, 0],
+              y: [0, -2, 2, -1, 0]
+            }}
+            transition={{ 
+              duration: 6, 
+              repeat: Infinity, 
+              repeatType: "reverse" 
+            }}
+          >
+            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg relative">
+              <motion.div
+                className="absolute inset-0 rounded-full bg-yellow-200 dark:bg-yellow-500/30 opacity-30"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <motion.svg 
+                className="w-12 h-12 text-yellow-500 dark:text-yellow-400"
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth={1.5}
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" 
+                />
+              </motion.svg>
+            </div>
+            
+            {/* Star particles */}
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-yellow-400 dark:bg-yellow-300 rounded-full"
+                style={{
+                  top: `${30 + Math.random() * 30}%`,
+                  left: `${10 + Math.random() * 80}%`,
+                }}
+                animate={{
+                  scale: [0, 1, 0],
+                  opacity: [0, 1, 0]
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  delay: i * 0.5,
+                  ease: "easeInOut"
+                }}
+              />
+            ))}
+          </motion.div>
+        );
+      } else if (searchQuery.length > 0) {
+        return (
+          <motion.div 
+            className="relative mb-8"
+            animate={{ 
+              rotate: [0, -2, 2, -1, 0],
+              y: [0, -2, 2, -1, 0]
+            }}
+            transition={{ 
+              duration: 5, 
+              repeat: Infinity, 
+              repeatType: "reverse" 
+            }}
+          >
+            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg relative">
+              <motion.div
+                className="absolute inset-0 rounded-full bg-blue-200 dark:bg-blue-500/30 opacity-30"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <Search className="w-12 h-12 text-blue-500 dark:text-blue-400" />
+            </div>
+            
+            {/* Search query highlight */}
+            <motion.div
+              className="absolute top-2 right-0 bg-blue-500 text-white text-xs px-2 py-1 rounded-full"
+              initial={{ opacity: 0, scale: 0.8, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              "{searchQuery}"
+            </motion.div>
+          </motion.div>
+        );
+      } else {
+        return (
+          <motion.div 
+            className="relative mb-8"
+            animate={{ 
+              rotate: [0, -2, 2, -1, 0],
+              y: [0, -3, 3, -2, 0]
+            }}
+            transition={{ 
+              duration: 5, 
+              repeat: Infinity, 
+              repeatType: "reverse" 
+            }}
+          >
+            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg">
+              <motion.div
+                className="absolute inset-0 rounded-full bg-indigo-200 dark:bg-indigo-500/30 opacity-30"
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <Filter className="w-12 h-12 text-indigo-500 dark:text-indigo-400" />
+            </div>
+          </motion.div>
+        );
+      }
+    };
+  
+    return (
+      <motion.div
+        className="col-span-full text-center py-16 px-4 relative"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <Particles />
+        
+        <motion.div variants={itemVariants}>
+          <IllustrationElement />
+        </motion.div>
+        
+        <motion.h3 
+          variants={itemVariants}
+          className="text-2xl font-bold text-gray-800 dark:text-gray-200"
+        >
+          {showOnlyFavorites && favoriteProjects.length === 0
+            ? "Aucun projet en favoris"
+            : searchQuery.length > 0
+              ? "Aucun résultat pour cette recherche"
+              : "Aucun projet ne correspond à ce filtre"}
+        </motion.h3>
+        
+        <motion.p 
+          variants={itemVariants}
+          className="mt-3 max-w-md mx-auto text-gray-500 dark:text-gray-400"
+        >
+          {showOnlyFavorites && favoriteProjects.length === 0
+            ? "Vous n'avez pas encore ajouté de projets à vos favoris. Cliquez sur l'étoile pour en ajouter."
+            : searchQuery.length > 0
+              ? `Nous n'avons pas trouvé de projets contenant "${searchQuery}". Essayez d'autres termes ou vérifiez l'orthographe.`
+              : "Essayez de modifier vos critères de filtrage pour trouver des projets."}
+        </motion.p>
+        
+        {/* Interactive suggestion tags */}
+        <motion.div 
+          variants={itemVariants}
+          className="mt-6 flex flex-wrap justify-center gap-2"
+        >
+          {searchQuery.length > 0 && (
+            <>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-full text-sm transition-colors duration-200"
+                onClick={() => setSearchQuery('')}
+              >
+                Effacer la recherche
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-full text-sm transition-colors duration-200"
+                onClick={() => setSelectedTag('Tous')}
+              >
+                Voir tous les projets
+              </motion.button>
+            </>
+          )}
+          
+          {showOnlyFavorites && favoriteProjects.length === 0 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-full text-sm transition-colors duration-200"
+              onClick={() => setShowOnlyFavorites(false)}
+            >
+              Désactiver le filtre des favoris
+            </motion.button>
+          )}
+        </motion.div>
+      </motion.div>
+    );
+  };
+
+  // Enhanced statistics blocks with animations
+  const StatsBlock = ({ icon, value, label, color }) => (
+    <motion.div
+      variants={fadeInUp}
+      className={`flex flex-col items-center justify-center p-4 rounded-xl ${isDarkMode ? 'bg-neutral-800/80' : 'bg-white/90'} backdrop-blur-sm shadow-lg`}
+    >
+      <div className={`text-${color} mb-2`}>
+        {icon}
+      </div>
+      <motion.span
+        className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        {value}
+      </motion.span>
+      <span className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{label}</span>
+    </motion.div>
+  );
 
   return (
-    <motion.section
-      ref={sectionRef}
-      className="py-16 md:py-24 px-4 sm:px-6 md:px-8 bg-transparent relative overflow-hidden"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-    >
+    <section ref={sectionRef} className="py-8">
+      {/* Animated page header */}
       <motion.div
-        className="max-w-7xl mx-auto px-4 sm:px-8 transition-colors duration-300 relative z-10"
-        style={{
-          opacity: galleryOpacity,
-          scale: galleryScale
-        }}
+        ref={headerRef}
+        style={{ opacity: headerOpacity, y: prefersReducedMotion ? 0 : headerY }}
+        className="text-center mb-8"
       >
-        <motion.div
-          ref={headerRef}
-          variants={staggerContainer}
+        <motion.h2
+          className={`text-3xl md:text-4xl font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
+          variants={fadeInUp}
           initial="hidden"
           animate={headerInView ? "visible" : "hidden"}
-          className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6"
         >
-          <motion.div
-            variants={fadeInUp}
-            className="mb-4 sm:mb-0"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <motion.h2
-                className={`text-3xl sm:text-4xl font-bold ${
-                  isDarkMode ? 'text-white' : 'text-gold'
-                } tracking-tight relative inline-block`}
-              >
-                Galerie de projets
-                <motion.span
-                  className={`absolute -bottom-1 left-0 h-1 rounded-full ${
-                    isDarkMode ? 'bg-yellow-400' : 'bg-gold'
-                  }`}
-                  initial={{ width: '0%' }}
-                  animate={headerInView ? { width: '100%' } : { width: '0%' }}
-                  transition={{ delay: 0.5, duration: 1 }}
-                />
-              </motion.h2>
-              <motion.span
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={headerInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                transition={{ delay: 0.8, duration: 0.3 }}
-              >
-                {stats.totalProjects} Projets
-              </motion.span>
-            </div>
-            <motion.p
-              className={`max-w-2xl text-sm sm:text-base leading-relaxed ${
-                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+          Mes Projets
+        </motion.h2>
+        <motion.p
+          className={`text-md md:text-lg max-w-2xl mx-auto ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}
+          variants={fadeInUp}
+          initial="hidden"
+          animate={headerInView ? "visible" : "hidden"}
+          transition={{ delay: 0.1 }}
+        >
+          Découvrez mon portfolio de réalisations en développement web et applications.
+        </motion.p>
+      </motion.div>
+
+      {/* Enhanced filters with animations */}
+      <motion.div
+        ref={filtersRef}
+        variants={staggerContainer}
+        initial="hidden"
+        animate={filtersInView ? "visible" : "hidden"}
+        className="flex flex-col md:flex-row justify-between items-center max-w-6xl mx-auto px-4 mb-6 gap-4"
+      >
+        <div className="flex flex-wrap gap-2 w-full md:w-auto justify-center md:justify-start">
+          {tags.map((tag, i) => (
+            <motion.button
+              key={tag}
+              onClick={() => {
+                setSelectedTag(tag);
+              }}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                selectedTag === tag
+                  ? isDarkMode
+                    ? 'bg-customyellow text-neutral-900'
+                    : 'bg-customyellow text-gray-900'
+                  : isDarkMode
+                  ? 'bg-neutral-800 text-gray-300 hover:bg-neutral-700'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
               variants={fadeInUp}
-            >
-              Découvrez une collection de projets modernes et sobres, représentant diverses technologies et domaines d'expertise.
-            </motion.p>
-          </motion.div>
-          <motion.div
-            className="flex flex-wrap gap-3"
-            variants={fadeInUp}
-          >
-            <motion.button
-              onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                showOnlyFavorites
-                  ? isDarkMode
-                    ? 'bg-customyellow/20 text-customyellow border border-customyellow/30'
-                    : 'bg-customyellow/20 text-customyellow border border-customyellow hover:bg-gray-50'
-                  : isDarkMode
-                    ? 'bg-neutral-800 text-gray-300 border border-neutral-700 hover:bg-neutral-700'
-                    : 'bg-white text-gray-700 border border-customyellow hover:bg-gray-50'
-              }`}
-              aria-pressed={showOnlyFavorites}
+              custom={i}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <svg
-                className={`w-5 h-5 ${
-                  showOnlyFavorites
-                    ? 'text-customyellow fill-customyellow'
-                    : 'text-gray-400'
-                }`}
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={showOnlyFavorites ? 0 : 1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-                />
-              </svg>
-              <span>Favoris</span>
-              {showOnlyFavorites && (
-                <motion.span
-                  className="absolute -top-1 -right-1 w-2 h-2 bg-customyellow rounded-full"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: [0, 1.2, 1] }}
-                  transition={{ duration: 0.3 }}
-                />
-              )}
+              {tag}
             </motion.button>
-          </motion.div>
-        </motion.div>
+          ))}
+        </div>
 
-        <motion.div
-          ref={statsRef}
-          className="mb-10 flex flex-col gap-6"
-          variants={staggerContainer}
-          initial="hidden"
-          animate={statsInView ? "visible" : "hidden"}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <motion.div className="lg:col-span-1" variants={fadeInUp}>
-              <div className={`relative flex items-center ${
-                isDarkMode ? 'text-gray-200' : 'text-gray-700'
-              }`}>
-                <svg
-                  className="w-5 h-5 absolute left-3 text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <motion.input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Rechercher un projet... (Ctrl+K)"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`pl-10 pr-12 py-2 w-full rounded-full border focus:ring-2 focus:outline-none transition-all duration-200 ${
-                    isDarkMode
-                      ? 'bg-neutral-800/80 border-neutral-700 focus:border-neutral-500 focus:ring-neutral-600 text-white placeholder-gray-500'
-                      : 'bg-white/80 border-gray-300 focus:border-gray-400 focus:ring-gray-200 text-gray-900 placeholder-gray-400'
-                  }`}
-                  aria-label="Rechercher un projet"
-                  initial={{ width: '90%' }}
-                  whileFocus={{ width: '100%', boxShadow: '0 0 0 3px rgba(156, 163, 175, 0.2)' }}
-                  transition={{ duration: 0.3 }}
-                />
-                {searchQuery ? (
-                  <motion.button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 rounded-full p-1 hover:bg-gray-200 dark:hover:bg-neutral-700 transition-colors"
-                    aria-label="Effacer la recherche"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </motion.button>
-                ) : (
-                  <span className="absolute right-3 text-xs text-gray-400 font-mono">⌘K</span>
-                )}
-              </div>
-            </motion.div>
-            <motion.div className="lg:col-span-2 flex flex-wrap gap-3 items-center" variants={fadeInUp}>
-              <div className="flex items-center space-x-1 mr-6">
-                <motion.button
-                  onClick={() => setIsGridView(true)}
-                  className={`p-2 rounded-l-lg ${
-                    isGridView
-                      ? 'bg-customyellow/20 text-customyellow border-2 border-customyellow shadow-md'
-                      : isDarkMode
-                        ? 'bg-neutral-800 text-gray-400 hover:bg-neutral-700'
-                        : 'bg-white text-gray-500 hover:bg-gray-100'
-                  } transition-colors`}
-                  aria-label="Vue grille"
-                  whileHover={{ scale: isGridView ? 1 : 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </motion.button>
-                <motion.button
-                  onClick={() => setIsGridView(false)}
-                  className={`p-2 rounded-r-lg ${
-                    !isGridView
-                      ? 'bg-customyellow/20 text-customyellow border-2 border-customyellow shadow-md'
-                      : isDarkMode
-                        ? 'bg-neutral-800 text-gray-400 hover:bg-neutral-700'
-                        : 'bg-white text-gray-500 hover:bg-gray-100'
-                  } transition-colors`}
-                  aria-label="Vue liste"
-                  whileHover={{ scale: !isGridView ? 1 : 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
-                </motion.button>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {tags.map((tag, index) => (
-                  <motion.button
-                    key={tag}
-                    onClick={() => setSelectedTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                      selectedTag === tag
-                        ? isDarkMode
-                          ? 'bg-customyellow/20 text-customyellow border border-customyellow/30'
-                          : 'bg-customyellow text-white border-2 border-customyellow shadow-md'
-                        : isDarkMode
-                          ? 'bg-neutral-800 text-gray-300 border border-neutral-700 hover:bg-neutral-700'
-                          : 'bg-white text-gray-700 border border-customyellow hover:bg-gray-50'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={statsInView ? {
-                      opacity: 1,
-                      y: 0,
-                      transition: { delay: 0.1 + index * 0.1 }
-                    } : {}}
-                  >
-                    
-                    {tag}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          {...animationSettings}
-        >
-          {isLoading ? (
-            Array.from({ length: 9 }, (_, i) => (
-              <motion.div
-                key={`skeleton-${i}`}
-                className={`rounded-xl overflow-hidden h-64 ${
-                  isDarkMode ? 'bg-neutral-800' : 'bg-gray-100'
-                }`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-center md:justify-end">
+          {/* Search box with animation */}
+          <motion.div
+            variants={fadeInUp}
+            className="relative flex-1 md:max-w-xs"
+          >
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              className={`block w-full pl-10 pr-3 py-2 rounded-lg text-sm ${
+                isDarkMode
+                  ? 'bg-neutral-800 border-neutral-700 text-white placeholder-gray-400 focus:ring-customyellow focus:border-customyellow'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500'
+              }`}
+              placeholder="Rechercher un projet..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setSearchQuery('')}
               >
-                <div className="w-full h-full animate-pulse">
-                  <div className={`w-full h-32 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'}`} />
-                  <div className="p-4 space-y-3">
-                    <div className={`h-4 w-2/3 rounded ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'}`} />
-                    <div className={`h-3 w-1/2 rounded ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'}`} />
-                    <div className="flex gap-2">
-                      {[1, 2].map((_, j) => (
-                        <div
-                          key={j}
-                          className={`h-6 w-12 rounded-full ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'}`}
-                        />
-                      ))}
-                    </div>
+                <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </motion.div>
+
+          {/* Toggle favorite filter */}
+          <motion.button
+            variants={fadeInUp}
+            onClick={() => {
+              setShowOnlyFavorites(!showOnlyFavorites);
+            }}
+            className={`p-2 rounded-lg ${
+              showOnlyFavorites
+                ? 'bg-customyellow text-gray-900'
+                : isDarkMode
+                ? 'bg-neutral-800 text-gray-300 hover:bg-neutral-700'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={showOnlyFavorites ? 'Voir tous les projets' : 'Voir les favoris uniquement'}
+          >
+            <svg
+              className="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill={showOnlyFavorites ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth={showOnlyFavorites ? 0 : 1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
+              />
+            </svg>
+          </motion.button>
+
+          {/* Toggle view mode */}
+          <motion.button
+            variants={fadeInUp}
+            onClick={() => {
+              setIsGridView(!isGridView);
+            }}
+            className={`p-2 rounded-lg ${
+              isDarkMode
+                ? 'bg-neutral-800 text-gray-300 hover:bg-neutral-700'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={isGridView ? 'Vue liste' : 'Vue grille'}
+          >
+            {isGridView ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
+            )}
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* Gallery with animations */}
+      <motion.div
+        style={{
+          opacity: prefersReducedMotion ? 1 : galleryOpacity,
+          scale: prefersReducedMotion ? 1 : galleryScale,
+        }}
+        className="max-w-6xl mx-auto px-4"
+      >
+        {isLoading ? (
+          // Skeleton loader with enhanced animations
+          <div className={`grid ${isGridView ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
+            {[...Array(6)].map((_, i) => (
+              <motion.div
+                key={i}
+                className={`rounded-xl overflow-hidden shadow-md ${
+                  isDarkMode ? 'bg-neutral-800' : 'bg-white'
+                }`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <div className="h-40 bg-gray-300 dark:bg-gray-700 animate-pulse" />
+                <div className="p-4">
+                  <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded animate-pulse mb-3 w-3/4" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse mb-2 w-full" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse w-2/3" />
+                  <div className="mt-4 flex gap-2">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse w-16" />
+                    <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded-full animate-pulse w-20" />
                   </div>
                 </div>
               </motion.div>
-            ))
-          ) : (
-            <AnimatePresence mode="popLayout">
-              {filteredProjects.length > 0 ? (
-                filteredProjects.map((project, i) => (
+            ))}
+          </div>
+        ) : filteredProjects.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <LayoutGroup>
+            <motion.div
+              layout
+              className={`grid ${isGridView ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}
+            >
+              <AnimatePresence>
+                {filteredProjects.map((project, i) => (
                   <ProjectCard
-                    key={project.id || project.title}
+                    key={project.id || `project-${i}`}
                     project={project}
                     isDarkMode={isDarkMode}
                     toggleFavorite={toggleFavorite}
@@ -614,61 +965,26 @@ function ProjectsGallery({ isDarkMode }) {
                     cardVariants={cardVariants}
                     isGridView={isGridView}
                   />
-                ))
-              ) : (
-                <motion.div
-                  className="col-span-full text-center py-12"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <motion.h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                    Aucun projet trouvé
-                  </motion.h3>
-                  <motion.p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Essayez de modifier vos filtres ou votre recherche.
-                  </motion.p>
-                  {/* Reset Filters Button for empty favorites */}
-                  {showOnlyFavorites && favoriteProjects.length === 0 && (
-  <button
-    className="mt-6 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold shadow-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400/40 flex items-center gap-2 transition-all duration-200 group"
-    aria-label="Réinitialiser les filtres"
-    onClick={() => {
-      setShowOnlyFavorites(false);
-      setSelectedTag('Tous');
-      setSearchQuery('');
-    }}
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-5 h-5 text-white opacity-80 group-hover:rotate-[-20deg] group-hover:scale-110 transition-transform duration-200"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582M19.418 19A9 9 0 106 6.582" />
-    </svg>
-    Réinitialiser les filtres
-  </button>
-)}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          )}
-        </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          </LayoutGroup>
+        )}
       </motion.div>
 
+      {/* Project detail modal */}
       <AnimatePresence>
         {modalProject && (
           <ProjectDetail
             project={modalProject}
             onClose={handleCloseModal}
             isDarkMode={isDarkMode}
+            isFavorite={favoriteProjects.includes(modalProject.id || modalProject.title)}
+            toggleFavorite={toggleFavorite}
           />
         )}
       </AnimatePresence>
-    </motion.section>
+    </section>
   );
 }
 

@@ -93,7 +93,7 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
       className={`relative rounded-xl overflow-hidden border transition-all duration-300 cursor-pointer
         ${isDarkMode
           ? `border-neutral-800 bg-neutral-900/40 backdrop-blur-sm ${interactionState ? 'border-[#A3001A]/70 shadow-[0_4px_32px_0_rgba(217,4,41,0.18)]' : ''}`
-          : `border-gray-200 bg-white/40 backdrop-blur-sm ${interactionState ? 'border-[#D90429]/70 shadow-[0_4px_32px_0_rgba(217,4,41,0.13)]' : ''}`
+          : `border-gray-200 bg-white/40 backdrop-blur-sm ${interactionState ? 'border-gold/70 shadow-[0_4px_32px_0_rgba(234,179,8,0.18)]' : ''}`
         }
         transform-gpu hover:scale-[1.02] focus-within:scale-[1.02]`}
       whileTap={{ scale: 0.975 }}
@@ -229,9 +229,19 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
                 } border flex items-center`}
                 whileHover={{ scale: 1.08, y: -1 }}
               >
-                <span className={`w-2 h-2 rounded-full mr-1 ${
-                  isDarkMode ? 'bg-gold' : 'bg-blue-500'
-                }`}></span>
+                <motion.svg
+                  className={`w-4 h-4 transition-all ${
+                    project.isFavorite ? 'text-[var(--customyellow)] fill-[var(--customyellow)]' : 'text-white'
+                  }`}
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </motion.svg>
                 {tool}
               </motion.span>
             ))}

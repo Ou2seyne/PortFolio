@@ -57,6 +57,7 @@ transition: 'transform 0.1s ease-out';
 
 :root {
   --gold: #eab308;
+  --customyellow: #FFD600;
   --bg-light: #ffffff;
   --bg-dark: #0f0f0f;
   --text-light: #f5f5f5;
