@@ -1,93 +1,137 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 
-function SkillCard({ skill, isDarkMode, index }) {
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Animation variants
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: index * 0.05,
-        duration: 0.4
-      }
-    }
+function SkillCard({ skill, isDarkMode }) {
+  // Calculate a subtle accent color based on proficiency
+  const getAccentColor = () => {
+    if (skill.proficiency >= 90) return isDarkMode ? 'bg-gold' : 'bg-gold';
+    if (skill.proficiency >= 75) return isDarkMode ? 'bg-gold/90' : 'bg-gold/90';
+    if (skill.proficiency >= 60) return isDarkMode ? 'bg-customyellow/90' : 'bg-customyellow/90';
+    return isDarkMode ? 'bg-customyellow/80' : 'bg-customyellow/80';
   };
 
-  // Calculate a vibrant accent color based on proficiency
-  const accentColor = skill.proficiency >= 80 ? 'bg-green-500' : 
-                      skill.proficiency >= 60 ? 'bg-blue-500' : 
-                      skill.proficiency >= 40 ? 'bg-yellow-500' : 'bg-orange-500';
-  
+  // Get skill level label
+  const getSkillLevel = () => {
+    if (skill.proficiency >= 90) return 'Expert';
+    if (skill.proficiency >= 75) return 'Advanced';
+    if (skill.proficiency >= 60) return 'Intermediate';
+    return 'Beginner';
+  };
+
+  // Calculate experience in years with proper labeling
+  const getExperienceLabel = () => {
+    const years = skill.years || 0;
+    if (years === 0) return 'Just started';
+    if (years < 1) return `${Math.round(years * 12)} months`;
+    return years === 1 ? '1 year' : `${years} years`;
+  };
+
   return (
-    <div
-      className={`rounded-xl p-6 relative h-full flex flex-col transform transition-all duration-300 
-        ${isHovered ? 'scale-105 shadow-lg z-10' : 'scale-100'}
-        ${isDarkMode 
-          ? 'bg-neutral-900 text-gray-100 border-2 border-customyellow/30' 
-          : 'bg-white text-gray-800 border-2 border-customyellow/20'
-        }`}
-      role="article"
-      aria-label={`${skill.name} skill card - ${skill.proficiency}% proficiency`}
-      tabIndex={0}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        boxShadow: isHovered ? (isDarkMode ? '0 8px 24px rgba(255, 204, 0, 0.15)' : '0 8px 24px rgba(255, 204, 0, 0.2)') : 'none'
+    <motion.div
+      className={`relative rounded-lg overflow-hidden ${
+        isDarkMode 
+          ? 'bg-accent border border-subtle/40' 
+          : 'bg-white border border-gold/10'
+      }`}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      whileHover={{ 
+        y: -4,
+        boxShadow: isDarkMode
+          ? '0 4px 12px -2px rgba(0, 0, 0, 0.2), 0 0 4px -1px rgba(251, 191, 36, 0.1)'
+          : '0 4px 12px -2px rgba(0, 0, 0, 0.1), 0 0 4px -1px rgba(251, 191, 36, 0.15)'
       }}
     >
-
-      {/* Logo Container with hover effect */}
-      <div
-        className={`w-20 h-20 mx-auto mb-5 rounded-full flex items-center justify-center transform transition-all duration-300 
-          ${isDarkMode 
-            ? 'bg-neutral-800' 
-            : 'bg-gray-100'} 
-          ${isHovered ? 'rotate-3 scale-110' : ''}`}
-        style={{
-          boxShadow: isDarkMode 
-            ? '0 4px 12px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.1)' 
-            : '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(255, 255, 255, 0.5)'
-        }}
-      >
-        <img
-          src={skill.logo}
-          alt={skill.name}
-          className="w-12 h-12 object-contain transition-transform duration-300"
-        />
-      </div>
-
-      {/* Skill name with animated underline on hover */}
-      <div className="relative text-center mb-4">
-        <h3 className={`text-xl font-semibold line-clamp-2 h-14 flex items-center justify-center 
-          ${!isDarkMode ? 'text-gray-800' : 'text-gray-100'}`}>
-          {skill.name}
-        </h3>
-        <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 h-0.5 bg-customyellow transition-all duration-300 rounded-full
-          ${isHovered ? 'w-16 opacity-100' : 'w-0 opacity-0'}`}></div>
-      </div>
-
-      {/* Progress indicator with animated fill */}
-      <div className="w-full mt-auto">
-        <div className={`flex justify-between text-sm mb-2 font-medium 
-          ${!isDarkMode ? 'text-gray-700' : 'text-gray-300'}`}>
-          <span>Maîtrise</span>
-          <span className={`font-bold ${isHovered ? 'text-customyellow' : ''}`}>{skill.proficiency}%</span>
+      {/* Top accent line */}
+      <div className={`h-1 w-full ${getAccentColor()}`} />
+      
+      <div className="p-5">
+        {/* Header: Logo and name */}
+        <div className="flex items-center mb-4">
+          <div className={`flex-shrink-0 w-10 h-10 rounded-md flex items-center justify-center mr-3 ${
+            isDarkMode ? 'bg-subtle/70' : 'bg-gray-50'
+          }`}>
+            <img 
+              src={skill.logo} 
+              alt={`${skill.name} logo`}
+              className="w-6 h-6 object-contain"
+              loading="lazy"
+            />
+          </div>
+          
+          <div>
+            <h3 className={`text-base font-medium ${
+              isDarkMode ? 'text-foreground' : 'text-gray-800'
+            }`}>
+              {skill.name}
+            </h3>
+            
+            <p className={`text-xs ${
+              isDarkMode ? 'text-foreground/70' : 'text-gray-600'
+            }`}>
+              {skill.category || 'Technology'}
+            </p>
+          </div>
         </div>
-        <div className="relative w-full h-3 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-          <div
-            className={`absolute top-0 left-0 h-full rounded-full bg-customyellow 
-              ${isHovered ? 'animate-pulse' : ''}`}
-            style={{ 
-              width: `${skill.proficiency}%`,
-              transition: 'width 0.8s ease-in-out, background-color 0.3s'
-            }}
-          ></div>
+        
+        {/* Proficiency meter */}
+        <div className="mb-3">
+          <div className="flex justify-between mb-1">
+            <span className={`text-xs ${
+              isDarkMode ? 'text-foreground/60' : 'text-gray-500'
+            }`}>
+              Proficiency
+            </span>
+            <span className={`text-xs font-medium ${
+              isDarkMode ? 'text-gold' : 'text-customyellow'
+            }`}>
+              {getSkillLevel()}
+            </span>
+          </div>
+          
+          <div className={`h-1.5 w-full rounded-full overflow-hidden ${
+            isDarkMode ? 'bg-background' : 'bg-gray-100'
+          }`}>
+            <motion.div
+              className={`h-full rounded-full ${getAccentColor()}`}
+              initial={{ width: 0 }}
+              whileInView={{ width: `${skill.proficiency}%` }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+            />
+          </div>
+        </div>
+        
+        {/* Experience indicator */}
+        {skill.years !== undefined && (
+          <div className="flex items-center justify-between">
+            <span className={`text-xs ${
+              isDarkMode ? 'text-foreground/60' : 'text-gray-500'
+            }`}>
+              Experience
+            </span>
+            <span className={`text-xs font-medium ${
+              isDarkMode ? 'text-foreground' : 'text-gray-800'
+            }`}>
+              {getExperienceLabel()}
+            </span>
+          </div>
+        )}
+        
+        {/* Percentage badge */}
+        <div className="mt-4 flex justify-end">
+          <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+            isDarkMode 
+              ? 'bg-gold/10 text-gold' 
+              : 'bg-gold/10 text-gold'
+          }`}>
+            {Math.round(skill.proficiency)}%
+          </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

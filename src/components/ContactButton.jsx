@@ -12,6 +12,7 @@ const ContactButton = ({ onOpenContact }) => {
       onOpenContact();
       return;
     }
+    
     const contactSection = document.getElementById('contact');
     if (contactSection) {
       const topOffset = 80;
@@ -37,34 +38,45 @@ const ContactButton = ({ onOpenContact }) => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: 0.4 }}
-      className="flex gap-6"
+      transition={{ duration: 0.6, delay: 0.2 }}
     >
-      <motion.a
-        href="#contact"
+      <motion.button
         onClick={handleClick}
-        className={`px-8 py-4 rounded-xl bg-gradient-to-r from-gold to-orange-500 text-white font-medium 
-                  shadow-lg shadow-gold/30 flex items-center gap-2.5 hover:shadow-xl hover:shadow-gold/40 
-                  transition-all duration-300 relative overflow-hidden group`}
-        whileHover={{ scale: 1.05, boxShadow: '0 10px 25px rgba(234,179,8,0.4)' }}
-        whileTap={{ scale: 0.98 }}
-        role="button"
-        aria-label="Naviguer vers la section contact"
+        className="relative group overflow-hidden px-8 py-4 rounded-lg bg-gold text-black font-medium 
+                  border border-gold/20 shadow-lg hover:shadow-gold/30
+                  transition-all duration-300 flex items-center gap-3"
+        whileHover={{ 
+          y: -4,
+          boxShadow: '0 8px 20px rgba(234,179,8,0.25)'
+        }}
+        whileTap={{ y: 0, scale: 0.98 }}
+        aria-label="Ouvrir le formulaire de contact"
       >
+        {/* Subtle shine effect */}
         <motion.div
-          className="absolute inset-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-700"
+          className="absolute inset-0 w-40 h-full bg-white/20 blur-sm"
           initial={{ x: '-100%', skewX: -15 }}
-          whileHover={{ x: '100%', skewX: -15 }}
-          transition={{ duration: 0.8 }}
+          animate={{ x: '200%', skewX: -15 }}
+          transition={{ 
+            duration: 2.5, 
+            repeat: Infinity, 
+            repeatType: "loop", 
+            ease: "easeInOut",
+            repeatDelay: 1
+          }}
         />
-        <span className="relative z-10">Contacter-nous</span>
+        
+        {/* Button text */}
+        <span className="relative z-10 font-medium tracking-wide">Me contacter</span>
+        
+        {/* Icon */}
         <motion.svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5 relative z-10"
           viewBox="0 0 20 20"
           fill="currentColor"
           initial={{ x: 0 }}
-          whileHover={{ x: 5 }}
+          whileHover={{ x: 3 }}
           transition={{ type: 'spring', stiffness: 400 }}
         >
           <path
@@ -73,8 +85,7 @@ const ContactButton = ({ onOpenContact }) => {
             clipRule="evenodd"
           />
         </motion.svg>
-        <span className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-gold to-[#D90429] opacity-0 group-hover:opacity-30 group-hover:animate-pulse blur-sm"></span>
-      </motion.a>
+      </motion.button>
     </motion.div>
   );
 };

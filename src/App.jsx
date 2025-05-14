@@ -31,31 +31,6 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
           { name: 'Projets', href: '#projects' },
         ];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 80) setLogoInNavbar(true);
-      else setLogoInNavbar(false);
-
-      // Section highlighting
-      const sections = [
-        { id: 'hero', ref: heroRef },
-        { id: 'about', ref: aboutRef },
-        { id: 'projects', ref: projectsRef },
-      ];
-      const scrollPos = window.scrollY + 120;
-      let current = 'hero';
-      for (const section of sections) {
-        if (section.ref.current) {
-          const top = section.ref.current.offsetTop;
-          if (scrollPos >= top) current = section.id;
-        }
-      }
-      setActiveSection(current);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const toggleDarkMode = () => {
     setIsDarkMode((prevMode) => {
       const newMode = !prevMode;
@@ -114,10 +89,27 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
                   isDarkMode={isDarkMode}
                 />
               </div>
-              <div id="about" ref={aboutRef} className="w-full pt-24">
+              {/* Scroll indicator between sections */}
+              <motion.div 
+                className="relative flex justify-center w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1, duration: 0.5 }}
+              >
+                <motion.div 
+                  className="absolute -top-12 flex flex-col items-center"
+                  animate={{ y: [0, 6, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <motion.div 
+                    className={`w-0.5 h-10 ${isDarkMode ? 'bg-gradient-to-b from-transparent to-gold/50' : 'bg-gradient-to-b from-transparent to-gold/80'}`}
+                  />
+                </motion.div>
+              </motion.div>
+              <div id="about" ref={aboutRef} className="w-full pt-8">
                 <About isDarkMode={isDarkMode} onOpenContact={() => setContactModalOpen(true)} />
               </div>
-              <div id="projects" ref={projectsRef} className="w-full pt-24">
+              <div id="projects" ref={projectsRef} className="w-full pt-16">
                 <ProjectsGallery isDarkMode={isDarkMode} />
               </div>
             </>
@@ -127,7 +119,7 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
       <AnimatePresence>
         {contactModalOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-sm p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -136,24 +128,27 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
             role="dialog"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
               className="relative w-full max-w-3xl mx-auto"
               onClick={e => e.stopPropagation()}
             >
+              {/* Close button */}
               <button
-                className="absolute top-4 right-4 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-gold to-[#D90429] shadow-lg border-2 border-white/70 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-gold/30 group"
+                className="absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center rounded-full 
+                bg-black/70 text-white hover:bg-black hover:scale-110 active:scale-95 transition-all duration-200 
+                focus:outline-none focus:ring-2 focus:ring-gold/30 group"
                 onClick={() => setContactModalOpen(false)}
                 aria-label="Fermer le formulaire de contact"
                 type="button"
               >
                 <svg
-                  className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300 drop-shadow"
+                  className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
@@ -161,15 +156,19 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
                   <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
                 </svg>
               </button>
-              <Contact />
+              
+              {/* Modal content */}
+              <motion.div 
+                className="relative overflow-hidden rounded-2xl"
+                initial={{ boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
+                animate={{ boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}
+              >
+                <Contact />
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-      <motion.div
-        className="fixed bottom-0 left-0 right-0 h-1 bg-gold origin-left z-50"
-        style={{ scaleX: scrollYProgress }}
-      />
     </>
   );
 }

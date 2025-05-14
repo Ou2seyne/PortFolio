@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, ChevronUp, Menu, X } from 'lucide-react';
+import { Sun, Moon, Menu, X } from 'lucide-react';
 import Logo from './Logo';
 
 function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMode, toggleDarkMode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const headerRef = useRef(null);
   
@@ -22,31 +21,20 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
   // Handle scroll effects
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-      setShowScrollTop(window.scrollY > 300);
+      setIsScrolled(window.scrollY > 100);
     };
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
   // Header variants for animation
   const headerVariants = {
     top: {
-      backdropFilter: 'blur(10px)',
-      background: isDarkMode 
-        ? 'linear-gradient(90deg, rgba(18,18,24,0.98) 0%, rgba(32,24,8,0.98) 100%)'
-        : 'linear-gradient(90deg, #fffbe9 0%, #fff7e1 100%)',
-      boxShadow: '0 2px 12px 0 rgba(234,179,8,0.07)',
-      borderBottom: isDarkMode ? '1px solid #bfa14c22' : '1px solid #eab30822',
+      backdropFilter: 'blur(0px)',
+      background: 'transparent',
+      boxShadow: 'none',
+      height: '80px',
     },
     scrolled: {
       backdropFilter: 'blur(18px)',
@@ -56,20 +44,8 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
       boxShadow: isDarkMode 
         ? '0 4px 24px 0 rgba(234,179,8,0.09), 0 2px 8px rgba(0,0,0,0.18)'
         : '0 4px 24px 0 #ffe06644, 0 2px 8px #eab30811',
-      borderBottom: isDarkMode ? '1px solid #bfa14c44' : '1px solid #eab30844',
+      height: '80px',
     }
-  };
-
-  // Scroll to top button variants
-  const scrollTopVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.8,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-    },
   };
 
   // Mobile menu variants
@@ -249,28 +225,46 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     <>
       <motion.header
         ref={headerRef}
-        className={`sticky top-0 w-full z-40 flex items-center justify-between px-5 sm:px-8 py-4 transition-all duration-300
+        className={`fixed top-0 w-full z-40 flex items-center justify-between px-5 sm:px-8 py-4 transition-all duration-500
           ${isDarkMode 
-            ? 'text-white border-b border-zinc-800/30' 
-            : 'text-gray-800 border-b border-gray-200/30'}`}
+            ? 'text-white' 
+            : 'text-gray-800'}`}
         initial="top"
         animate={isScrolled ? "scrolled" : "top"}
         variants={headerVariants}
         transition={{ type: 'spring', stiffness: 200, damping: 26 }}
       >
-        {/* Logo Section with subtle animation */}
+        {/* Logo Section */}
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: 'spring', stiffness: 400, damping: 10 }}
           className="flex items-center"
+          initial={{ opacity: 0.6 }}
+          animate={{ 
+            opacity: isScrolled ? 1 : logoInNavbar ? 1 : 0.6,
+            scale: isScrolled ? 1 : 0.95
+          }}
+          transition={{ duration: 0.4 }}
         >
-          <Logo logoInNavbar={logoInNavbar} shouldReduceMotion={shouldReduceMotion} isDarkMode={isDarkMode} />
+          <Logo logoInNavbar={logoInNavbar || isScrolled} shouldReduceMotion={shouldReduceMotion} isDarkMode={isDarkMode} />
         </motion.div>
 
         {/* Main Navigation - Desktop */}
-        <nav className="hidden md:flex items-center gap-1">
-          <div className="flex gap-2 mr-4">
+        <div className="flex items-center space-x-4">
+          {/* Nav Links - Desktop */}
+          <motion.nav 
+            className="hidden md:flex items-center gap-2 mr-2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ 
+              opacity: isScrolled ? 1 : 0,
+              x: isScrolled ? 0 : 20,
+              pointerEvents: isScrolled ? 'auto' : 'none'
+            }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 260, 
+              damping: 20,
+              delay: 0.1
+            }}
+          >
             {navItems.map((item, idx) => (
               <motion.a
                 key={item.name}
@@ -286,51 +280,36 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
                   }`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ 
-                  opacity: 1, 
-                  y: 0, 
-                  transition: { 
-                    delay: idx * 0.05,
-                    duration: 0.3
-                  } 
+                  opacity: 1,
+                  y: 0
+                }}
+                transition={{ 
+                  duration: 0.3,
+                  delay: 0.1 + (idx * 0.05)
                 }}
               >
                 {item.name}
               </motion.a>
             ))}
-          </div>
-          <DarkModeButton />
-        </nav>
+          </motion.nav>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden flex items-center">
+          {/* Dark Mode Toggle - Always Visible */}
           <DarkModeButton />
-          <MobileMenu />
+
+          {/* Mobile Menu Trigger - Only Visible When Scrolled on Mobile */}
+          <motion.div 
+            className="md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ 
+              opacity: isScrolled ? 1 : 0,
+              pointerEvents: isScrolled ? 'auto' : 'none'
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <MobileMenu />
+          </motion.div>
         </div>
       </motion.header>
-
-      {/* Scroll to top button */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            className={`fixed bottom-6 right-6 p-3 rounded-full z-30 shadow-lg
-              ${isDarkMode 
-                ? 'bg-indigo-900/80 text-indigo-200 hover:bg-indigo-800' 
-                : 'bg-white text-indigo-600 hover:bg-gray-50 shadow-indigo-100/50'
-              } backdrop-blur-sm`}
-            onClick={scrollToTop}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={scrollTopVariants}
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Scroll to top"
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <ChevronUp size={20} />
-          </motion.button>
-        )}
-      </AnimatePresence>
     </>
   );
 }
