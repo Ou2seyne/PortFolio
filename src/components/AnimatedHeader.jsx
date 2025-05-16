@@ -8,8 +8,7 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
   const [isScrolled, setIsScrolled] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const headerRef = useRef(null);
-  
-  // Handle dark mode
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -18,17 +17,14 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     }
   }, [isDarkMode]);
 
-  // Handle scroll effects
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100);
     };
-    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Header variants for animation
   const headerVariants = {
     top: {
       backdropFilter: 'blur(0px)',
@@ -39,16 +35,13 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     scrolled: {
       backdropFilter: 'blur(18px)',
       background: isDarkMode 
-        ? 'linear-gradient(90deg, rgba(18,18,24,0.96) 0%, rgba(40,30,10,0.96) 100%)'
-        : 'linear-gradient(90deg, #fffbe9 0%, #ffe6b8 100%)',
-      boxShadow: isDarkMode 
-        ? '0 4px 24px 0 rgba(234,179,8,0.09), 0 2px 8px rgba(0,0,0,0.18)'
-        : '0 4px 24px 0 #ffe06644, 0 2px 8px #eab30811',
+      ? '#1E1E1E'
+      : '#F5F5F5',
+      boxShadow: 'none',
       height: '80px',
     }
   };
 
-  // Mobile menu variants
   const mobileMenuVariants = {
     closed: {
       opacity: 0,
@@ -77,7 +70,6 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     open: { x: 0, opacity: 1 }
   };
 
-  // Mobile menu component
   const MobileMenu = () => (
     <>
       <button 
@@ -141,7 +133,7 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
                       activeSection === item.name.toLowerCase()
                         ? isDarkMode ? 'text-indigo-400' : 'text-indigo-600'
                         : isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-700 hover:text-indigo-600'
-                    } transition-colors duration-200`}
+                    } transition-all duration-200`}
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.name}
@@ -161,10 +153,10 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
       onClick={toggleDarkMode}
       aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
       className={`relative flex items-center justify-center w-10 h-10 rounded-full overflow-hidden
-        transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
+        transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
           isDarkMode 
-            ? 'bg-zinc-800 text-indigo-300' 
-            : 'bg-gray-100 text-indigo-600'
+            ? 'bg-black text-white border border-white/20' 
+            : 'bg-white text-black border border-black/20'
         }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -180,18 +172,6 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
             className="relative"
           >
             <Moon size={18} />
-            <motion.div 
-              className="absolute inset-0 rounded-full bg-indigo-400/20" 
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.2, 0.3, 0.2] 
-              }}
-              transition={{ 
-                duration: 3,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
           </motion.div>
         ) : (
           <motion.div
@@ -203,18 +183,6 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
             className="relative"
           >
             <Sun size={18} />
-            <motion.div 
-              className="absolute inset-0 rounded-full bg-indigo-500/20" 
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.2, 0.3, 0.2] 
-              }}
-              transition={{ 
-                duration: 3,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -225,10 +193,10 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     <>
       <motion.header
         ref={headerRef}
-        className={`fixed top-0 w-full z-40 flex items-center justify-between px-5 sm:px-8 py-4 transition-all duration-500
+        className={`fixed top-0 w-full z-40 flex items-center justify-between px-5 sm:px-8 py-4 transition-all duration-200
           ${isDarkMode 
             ? 'text-white' 
-            : 'text-gray-800'}`}
+            : 'text-black'}`}
         initial="top"
         animate={isScrolled ? "scrolled" : "top"}
         variants={headerVariants}
@@ -269,14 +237,14 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
               <motion.a
                 key={item.name}
                 href={item.href}
-                className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all
+                className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all ${isDarkMode ? 'border border-white/20 ' : 'border border-black/20'} 
                   ${activeSection === item.name.toLowerCase() 
                     ? isDarkMode 
-                      ? 'text-gold bg-gradient-to-r from-gold/20 to-orange/20 shadow-gold-glow font-bold' 
-                      : 'text-orange bg-gradient-to-r from-gold/20 to-orange/10 shadow-gold-glow font-bold'
+                      ? 'text-white bg-black/20 shadow-gold-glow font-bold' 
+                      : 'text-black bg-white/20 shadow-gold-glow font-bold'
                     : isDarkMode 
-                      ? 'text-zinc-300 hover:text-gold hover:bg-gold/10' 
-                      : 'text-gray-700 hover:text-orange hover:bg-gold/10'
+                      ? 'text-white hover:bg-white hover:text-black' 
+                      : 'text-black hover:bg-black hover:text-white'
                   }`}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ 
@@ -313,5 +281,4 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     </>
   );
 }
-
 export default EnhancedModernHeader;

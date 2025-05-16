@@ -30,13 +30,7 @@ function Logo({ logoInNavbar, scrolled, shouldReduceMotion, isDarkMode }) {
       ) : (
         <motion.div className="w-10 h-10" />
       )}
-      <motion.span
-        className={`text-xl font-bold tracking-widest ${isDarkMode ? 'text-gold' : 'text-orange-500'}`}
-        animate={{ opacity: scrolled ? 1 : 0.8 }}
-        transition={{ duration: 0.3 }}
-      >
-        <span className="text-orange-500">OUSSEYNE</span> FOLIO
-      </motion.span>
+
     </div>
   );
 }

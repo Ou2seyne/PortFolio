@@ -4,7 +4,7 @@ const allProjects = [
     description: 'Un portfolio moderne et responsive pour présenter mon travail et mes compétences.',
     tag: 'Site Web',
     tools: ['React', 'Tailwind CSS', 'Framer Motion'],
-    image: './src/assets/images/portfolio.png',
+    image: './src/assets/images/image.png',
     link: '#',
     status: 'completed',
     date: '2025'

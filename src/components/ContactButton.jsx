@@ -42,21 +42,19 @@ const ContactButton = ({ onOpenContact }) => {
     >
       <motion.button
         onClick={handleClick}
-        className="relative group overflow-hidden px-8 py-4 rounded-lg bg-gold text-black font-medium 
-                  border border-gold/20 shadow-lg hover:shadow-gold/30
+        className="relative group overflow-hidden px-8 py-4 rounded-lg bg-black dark:bg-white dark:text-black text-white font-medium 
+                  border border-black/20 shadow-lg hover:shadow-black/30
                   transition-all duration-300 flex items-center gap-3"
         whileHover={{ 
           y: -4,
-          boxShadow: '0 8px 20px rgba(234,179,8,0.25)'
+          boxShadow: '0 8px 20px rgba(0, 0, 0, 0.25)'
         }}
         whileTap={{ y: 0, scale: 0.98 }}
         aria-label="Ouvrir le formulaire de contact"
       >
         {/* Subtle shine effect */}
         <motion.div
-          className="absolute inset-0 w-40 h-full bg-white/20 blur-sm"
-          initial={{ x: '-100%', skewX: -15 }}
-          animate={{ x: '200%', skewX: -15 }}
+          className="absolute inset-0 w-40 h-full"
           transition={{ 
             duration: 2.5, 
             repeat: Infinity, 
@@ -67,7 +65,7 @@ const ContactButton = ({ onOpenContact }) => {
         />
         
         {/* Button text */}
-        <span className="relative z-10 font-medium tracking-wide">Me contacter</span>
+        <span className="relative z-10 font-medium tracking-wide ">Me contacter</span>
         
         {/* Icon */}
         <motion.svg

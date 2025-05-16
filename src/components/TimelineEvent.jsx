@@ -83,7 +83,7 @@ function TimelineEvent({ item, idx }) {
         <motion.div
           className="absolute left-1/2 transform -translate-x-1/2 w-14 h-14 
                     bg-gradient-to-br from-gold to-yellow-400 rounded-full flex items-center justify-center 
-                    z-10 border-4 border-white dark:border-neutral-700 cursor-pointer shadow-lg"
+                    z-10 border-4 border-white dark:border-white/50 cursor-pointer shadow-lg"
           variants={circleVariants}
           whileHover="hover"
           animate={isHovered ? "hover" : "animate"}
@@ -120,7 +120,7 @@ function TimelineEvent({ item, idx }) {
         <motion.div
           className={`rounded-xl px-8 py-6 shadow-xl border border-neutral-200 dark:border-gold/30 text-left
                     ${idx % 2 === 0 ? 'md:mr-12' : 'md:ml-12'} mx-auto md:mx-0
-                    relative md:w-[380px] cursor-pointer bg-neutral-50 dark:bg-neutral-800/90 
+                    relative md:w-[380px] cursor-pointer bg-white dark:bg-black 
                     backdrop-blur-sm text-neutral-800 dark:text-neutral-300 transition-colors duration-300
                     hover:border-gold/50`}
           onClick={() => setIsExpanded(!isExpanded)}
@@ -130,7 +130,7 @@ function TimelineEvent({ item, idx }) {
         >
           {/* Year badge with gradient */}
           <div className="absolute -top-3 -left-2 bg-gradient-to-r from-gold to-yellow-500 px-4 py-1.5 
-                         rounded-lg text-sm font-bold text-white shadow-lg transform -rotate-2">
+                         rounded-lg text-sm font-bold text-white dark:text-black shadow-lg transform -rotate-2">
             {item.year}
           </div>
 
@@ -160,28 +160,10 @@ function TimelineEvent({ item, idx }) {
                   className="mt-6 pt-5 border-t border-gold/20"
                 >
                   <div className="space-y-4">
-                    <p className="text-neutral-700 dark:text-neutral-400 leading-relaxed">
+                    <p className="text-black dark:text-white leading-relaxed">
                       {item.details}
                     </p>
                     
-                    {/* Key achievements section - assuming details contains important points */}
-                    {item.keyPoints && (
-                      <div className="mt-4">
-                        <h4 className="font-medium text-gold dark:text-yellow-400 mb-2">Points clés:</h4>
-                        <ul className="list-disc list-inside space-y-1 pl-2 text-sm text-neutral-700 dark:text-neutral-400">
-                          {item.keyPoints.map((point, i) => (
-                            <motion.li 
-                              key={i}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: i * 0.1 }}
-                            >
-                              {point}
-                            </motion.li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
               )}

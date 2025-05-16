@@ -13,12 +13,10 @@ import { Filter, Search } from 'lucide-react';
 import allProjects from './projectsData';
 import ProjectDetail from './ProjectDetail';
 
-// Dynamically import all images in assets/images using Vite's import.meta.glob
 const imagesMap = Object.fromEntries(
   Object.entries(import.meta.glob('../assets/images/*', { eager: true })).map(([path, mod]) => [path.split('/').pop(), mod.default])
 );
 
-// Enhanced transitions for smoother animations
 const springTransition = {
   type: "spring",
   stiffness: 400,
@@ -32,7 +30,6 @@ const smoothTransition = {
   duration: 0.6
 };
 
-// Enhanced animation variants
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: {
@@ -58,7 +55,6 @@ const staggerContainer = {
   }
 };
 
-// Enhanced floating animation for idle cards
 const floatingAnimation = {
   y: [0, -5, 0],
   transition: {
@@ -68,7 +64,6 @@ const floatingAnimation = {
   }
 };
 
-// Enhanced ProjectCard with interactive features and animations
 const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, cardVariants, isGridView }) => {
   const cardRef = useRef(null);
   const isInView = useInView(cardRef, { once: true, amount: 0.2 });
@@ -499,39 +494,6 @@ function ProjectsGallery({ isDarkMode }) {
         }
       }
     };
-
-    const Particles = () => {
-      return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"
-              initial={{ 
-                x: `${50 + (Math.random() * 10 - 5)}%`, 
-                y: '60%', 
-                opacity: 0.3 + Math.random() * 0.4 
-              }}
-              animate={{
-                x: `${50 + (Math.sin(i) * 30)}%`,
-                y: ['60%', '20%', '60%'],
-                opacity: [0.3 + Math.random() * 0.4, 0.8, 0.2]
-              }}
-              transition={{
-                duration: 4 + i * 0.5,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-                delay: i * 0.2
-              }}
-              style={{
-                scale: 0.5 + Math.random() * 1
-              }}
-            />
-          ))}
-        </div>
-      );
-    };
     
     // Dynamic illustration based on filter context
     const IllustrationElement = () => {
@@ -613,16 +575,16 @@ function ProjectsGallery({ isDarkMode }) {
           >
             <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg relative">
               <motion.div
-                className="absolute inset-0 rounded-full bg-blue-200 dark:bg-blue-500/30 opacity-30"
+                className="absolute inset-0 rounded-full bg-gold dark:bg-gold/30 opacity-30"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              <Search className="w-12 h-12 text-blue-500 dark:text-blue-400" />
+              <Search className="w-12 h-12 text-gold dark:text-gold" />
             </div>
             
             {/* Search query highlight */}
             <motion.div
-              className="absolute top-2 right-0 bg-blue-500 text-white text-xs px-2 py-1 rounded-full"
+              className="absolute top-2 right-0 bg-gold text-white text-xs px-2 py-1 rounded-full"
               initial={{ opacity: 0, scale: 0.8, x: 10 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ delay: 0.5 }}
@@ -647,11 +609,11 @@ function ProjectsGallery({ isDarkMode }) {
           >
             <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center shadow-lg">
               <motion.div
-                className="absolute inset-0 rounded-full bg-indigo-200 dark:bg-indigo-500/30 opacity-30"
+                className="absolute inset-0 rounded-full bg-gold dark:bg-gold/30 opacity-30"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
-              <Filter className="w-12 h-12 text-indigo-500 dark:text-indigo-400" />
+              <Filter className="w-12 h-12 text-gold dark:text-gold" />
             </div>
           </motion.div>
         );
@@ -665,7 +627,6 @@ function ProjectsGallery({ isDarkMode }) {
         initial="hidden"
         animate="visible"
       >
-        <Particles />
         
         <motion.div variants={itemVariants}>
           <IllustrationElement />
@@ -764,7 +725,7 @@ function ProjectsGallery({ isDarkMode }) {
         className="text-center mb-8"
       >
         <motion.h2
-          className={`text-3xl md:text-4xl font-bold mb-3 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}
+          className={`text-3xl md:text-4xl font-bold mb-3 text-gold`}
           variants={fadeInUp}
           initial="hidden"
           animate={headerInView ? "visible" : "hidden"}
@@ -833,7 +794,7 @@ function ProjectsGallery({ isDarkMode }) {
               className={`block w-full pl-10 pr-3 py-2 rounded-lg text-sm ${
                 isDarkMode
                   ? 'bg-neutral-800 border-neutral-700 text-white placeholder-gray-400 focus:ring-customyellow focus:border-customyellow'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-gold focus:border-gold'
               }`}
               placeholder="Rechercher un projet..."
               value={searchQuery}

@@ -117,7 +117,7 @@ const ProjectCard = forwardRef(({ project, isSelected, onClick, priority = 0, is
       }}
     >
       {/* Image Container */}
-      <div className="aspect-video overflow-hidden relative bg-transparent">
+      <div className="aspect-video overflow-hidden relative bg-black">
         {!isImageLoaded && (
           <div className="absolute inset-0 bg-gray-200 dark:bg-neutral-800 animate-pulse flex items-center justify-center">
             <svg className="w-10 h-10 text-gray-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24">

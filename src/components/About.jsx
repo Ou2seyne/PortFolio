@@ -21,28 +21,24 @@ const roadmap = [
   {
     year: '2022',
     title: 'Bac Pro Métiers de l\'Électricité et de ses Environnements Connectés (MELEC)',
-    // Diplômé avec Mention Bien, puis réorientation en informatique et développement.
     icon: '🎓',
     details: 'Après mon Bac Pro Métiers de l\'Électricité et de ses Environnements Connectés, j\'ai découvert ma passion pour la programmation et le design, ce qui m\'a poussé à me réorienter vers l\'informatique.',
   },
   {
     year: '2023',
     title: 'BTS Services Informatiques aux Organisations (SIO)',
-    // Début de mon BTS, avec un focus sur le développement web et les systèmes informatiques.
     icon: '💻',
     details: 'Je me suis concentré sur la conception web interactive et les principes d\'UI/UX.',
   },
   {
     year: '2024/2025',
     title: 'BTS Services Informatiques aux Organisations (SIO)',
-    // Toujours en BTS, avec une formation dans divers langages de programmation et un intérêt marqué pour l'UI/UX.
     icon: '💻',
     details: 'Formation en développement web et systèmes, avec un focus particulier sur la conception d\'interfaces utilisateurs.',
   },
   {
     year: '2025/2026',
     title: 'Prévisions futures',
-    // Prévoit de poursuivre en licence puis en école d'ingénieurs après son BTS SIO.
     icon: '🚀',
     details: 'Après mon BTS SIO, je prévois de continuer en licence pour approfondir mes compétences en informatique, puis intégrer une école d\'ingénieurs pour me spécialiser dans le développement et le design.',
   },
@@ -85,59 +81,6 @@ const CustomCursor = ({ isDarkMode }) => {
   const cursorOuterRef = useRef(null);
 
   const springConfig = { damping: 25, stiffness: 120 };
-  const cursorX = useSpring(0, springConfig);
-  const cursorY = useSpring(0, springConfig);
-  const cursorOuterX = useSpring(0, springConfig);
-  const cursorOuterY = useSpring(0, springConfig);
-
-  useEffect(() => {
-    const moveCursor = (e) => {
-      const { clientX, clientY } = e;
-      setMousePosition({ x: clientX, y: clientY });
-      cursorX.set(clientX - 5);
-      cursorY.set(clientY - 5);
-      cursorOuterX.set(clientX - 15);
-      cursorOuterY.set(clientY - 15);
-    };
-
-    const handleMouseDown = () => setIsClicking(true);
-    const handleMouseUp = () => setIsClicking(false);
-
-    window.addEventListener('mousemove', moveCursor);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      window.removeEventListener('mousemove', moveCursor);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [cursorX, cursorY, cursorOuterX, cursorOuterY]);
-
-  return (
-    <>
-      <motion.div
-        ref={cursorOuterRef}
-        className={`fixed pointer-events-none w-8 h-8 rounded-full border ${isDarkMode ? 'border-gold/60' : 'border-gold/80'} z-50`}
-        style={{
-          x: cursorOuterX,
-          y: cursorOuterY,
-          scale: isClicking ? 0.8 : 1,
-        }}
-        transition={{ type: "spring", damping: 15 }}
-      />
-      <motion.div
-        ref={cursorRef}
-        className={`fixed pointer-events-none w-3 h-3 rounded-full ${isDarkMode ? 'bg-gold/80' : 'bg-gold'} z-50`}
-        style={{
-          x: cursorX,
-          y: cursorY,
-          scale: isClicking ? 1.2 : 1,
-        }}
-        transition={{ type: "spring", damping: 15 }}
-      />
-    </>
-  );
 };
 
 const ScrollProgress = ({ scrollYProgress, isDarkMode }) => {
@@ -190,50 +133,7 @@ const EnhancedTooltip = ({ text, children }) => {
   );
 };
 
-const CardHoverEffect = ({ children, className }) => {
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
-  const [scale, setScale] = useState(1);
 
-  const handleMouseMove = (e) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateXVal = (y - centerY) / 10;
-    const rotateYVal = (centerX - x) / 10;
-
-    setRotateX(rotateXVal);
-    setRotateY(rotateYVal);
-    setScale(1.05);
-  };
-
-  const handleMouseLeave = () => {
-    setRotateX(0);
-    setRotateY(0);
-    setScale(1);
-  };
-
-  return (
-    <motion.div
-      className={`${className || ''} perspective-1000`}
-      style={{
-        rotateX,
-        rotateY,
-        scale,
-        transition: "transform 0.3s ease"
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      {children}
-    </motion.div>
-  );
-};
 
 const AnimatedSectionTitle = ({ title, isDarkMode }) => {
   return (
@@ -358,16 +258,16 @@ export default function About({ isDarkMode, onOpenContact }) {
   };
 
   const darkModeClasses = {
-    sectionBg: 'bg-accent/50 backdrop-blur-lg',
+    sectionBg: 'bg-black', // pure black, no blur, no accent
     heading: 'text-gold',
     paragraph: 'text-gray-300',
     secondaryText: 'text-gray-400',
     accent: 'text-gold',
-    cardBg: 'bg-accent shadow-xl hover:shadow-2xl',
-    badge: 'bg-accent text-foreground',
+    cardBg: 'bg-zinc-900 shadow-xl hover:shadow-2xl',
+    badge: 'bg-zinc-900 text-foreground',
     activeBadge: 'bg-gradient-to-r from-gold to-orange-500 text-background',
-    buttonBg: 'bg-accent hover:bg-accent/80',
-    timeline: 'bg-accent/70 border border-gold/10',
+    buttonBg: 'bg-zinc-900 hover:bg-zinc-800',
+    timeline: 'bg-black border border-gold/10',
     divider: 'bg-gradient-to-r from-gold/50 to-transparent',
   };
 
@@ -398,8 +298,8 @@ export default function About({ isDarkMode, onOpenContact }) {
     <section
       id="about"
       ref={containerRef}
-      className="w-full max-w-7xl mx-auto py-12 md:py-16 px-6 md:px-12 bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300 relative overflow-hidden"
-      style={{ position: 'relative' }}
+      className={`w-full max-w-7xl mx-auto py-12 md:py-16 px-6 md:px-12 ${themeClasses.sectionBg} ${themeClasses.paragraph} transition-colors duration-300 relative overflow-hidden`}
+      style={{ position: 'relative', border: 'none' }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHoveringContainer(true)}
       onMouseLeave={() => setIsHoveringContainer(false)}
@@ -419,8 +319,7 @@ export default function About({ isDarkMode, onOpenContact }) {
       {/* Custom cursor */}
       <CustomCursor isDarkMode={isDarkMode} />
 
-      {/* Scroll progress indicator */}
-      <ScrollProgress scrollYProgress={scrollYProgress} isDarkMode={isDarkMode} />
+
 
       {/* Enhanced background elements with sophisticated animations */}
       <motion.div
@@ -546,32 +445,6 @@ export default function About({ isDarkMode, onOpenContact }) {
                   transition={{ duration: 0.8, delay: 0.9 }}
                   variants={containerVariants}
                 >
-                  {/* qualities.map((quality, i) => (
-                    <motion.div
-                      key={quality.name}
-                      className="relative group"
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: 0.9 + i * 0.15 }}
-                    >
-                      <motion.span
-                        className="flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-gold to-orange-500 text-white text-xl md:text-2xl font-bold"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        {quality.icon}
-                      </motion.span>
-                      <motion.span
-                        className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-black/80 text-white text-sm rounded-lg whitespace-nowrap"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {quality.name}
-                      </motion.span>
-                    </motion.div>
-                  )) */}
                 </motion.div>
               </motion.div>
 
@@ -582,19 +455,6 @@ export default function About({ isDarkMode, onOpenContact }) {
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
               >
-                <div className="relative w-full h-full">
-                  <img
-                    src="/src/assets/profile-pic.png"
-                    alt="Profile Picture"
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent rounded-lg"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 1, delay: 1 }}
-                  />
-                </div>
               </motion.div>
             </motion.div>
           </motion.div>
@@ -674,71 +534,92 @@ export default function About({ isDarkMode, onOpenContact }) {
               variants={containerVariants}
             >
               {filteredSkills.map((skill) => (
-                <CardHoverEffect key={skill.name} className="w-full">
-                  <SkillCard skill={skill} isDarkMode={isDarkMode} />
-                </CardHoverEffect>
+                <SkillCard key={skill.name} skill={skill} isDarkMode={isDarkMode} />
               ))}
             </motion.div>
           </motion.div>
 
           <motion.div
             ref={contactRef}
-            className="text-center py-16 px-6 md:px-12 relative"
+            className="flex justify-center items-center min-h-[340px] py-16 px-6 md:px-12 relative"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={sectionVariants}
           >
-            {/* Background effects */}
+            {/* Glassy card container */}
             <motion.div
-              className={`absolute inset-0 w-full opacity-20 -z-10 ${
-                isDarkMode ? 'bg-subtle/40' : 'bg-gold/5'
-              } rounded-2xl`}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+              className={`relative w-full max-w-5xl min-h-[320px] mx-auto shadow-2xl py-20 px-6 md:px-16 flex flex-col border border-gold rounded-2xl items-center justify-center overflow-hidden transition-all duration-300 ${isDarkMode ? 'bg-black/80 border border-gold/10' : 'bg-white/80 border border-gold/20 backdrop-blur-xl'}`}
+whileHover={{
+  scale: 1.03,
+  boxShadow: '0 8px 40px 0 rgba(255, 193, 7, 0.25), 0 2px 8px 0 rgba(0,0,0,0.10)',
+  borderColor: '#FFD700',
+  filter: 'brightness(1.04)'
+}}
+
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            />
-            
-            <motion.div
-              className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-20 bg-gold/20 -z-10"
-              animate={{ 
-                scale: [1, 1.2, 1],
-                opacity: [0.1, 0.2, 0.1]
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-            />
-            
-            {/* Content */}
-            <motion.div
-              className="max-w-2xl mx-auto"
-              variants={itemVariants}
+              transition={{ duration: 0., ease: 'easeOut' }}
             >
+              {/* Animated gold blob */}
+              <motion.div
+                className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl opacity-30 bg-gold/30 -z-10"
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  opacity: [0.1, 0.2, 0.1]
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+              />
+              {/* Animated underline blob */}
+              <motion.div
+                className="absolute left-1/2 bottom-0 -translate-x-1/2 w-40 h-8 rounded-full blur-2xl opacity-30 bg-orange-400/60 -z-10"
+                animate={{
+                  scaleX: [1, 1.1, 1],
+                  opacity: [0.18, 0.28, 0.18]
+                }}
+                transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse' }}
+              />
+              {/* Heading with gradient and icon */}
               <motion.h3
-                className={`text-3xl md:text-4xl font-bold mb-5 ${themeClasses.heading}`}
+                className="text-4xl md:text-5xl font-extrabold mb-5 bg-gradient-to-r from-gold via-orange-400 to-gold bg-clip-text text-transparent flex items-center gap-3 drop-shadow-lg"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
               >
-                Intéressé par mon travail ?
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-9 h-9 text-gold animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Intéressé par mon travail&nbsp;?
               </motion.h3>
-              
+
+              {/* Subheading paragraph */}
               <motion.p
-                className={`text-base md:text-lg mb-10 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+                className={`text-lg md:text-xl mb-10 font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-800'} leading-relaxed drop-shadow-sm`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
-                N'hésitez pas à me contacter pour discuter de vos projets ou pour toute information complémentaire.
+                N'hésitez pas à me <span className="text-gold font-semibold">contacter</span> pour discuter de vos projets ou pour toute information complémentaire. Je me ferai un plaisir de vous répondre rapidement&nbsp;!
               </motion.p>
-              
-              <ContactButton onClick={onOpenContact} />
+
+              {/* Enhanced contact button */}
+              <motion.div
+                initial={{ scale: 0.96, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, delay: 0.2, type: 'spring', stiffness: 220 }}
+              >
+                <ContactButton onOpenContact={onOpenContact} className="text-lg px-8 py-4 rounded-full shadow-xl bg-gradient-to-r from-gold to-orange-400 text-black font-bold border-none relative overflow-hidden hover:scale-105 focus:scale-105 transition-transform duration-300" />
+                {/* Glow effect */}
+                <span className="absolute inset-0 rounded-full pointer-events-none animate-pulse bg-gold/20 blur-xl opacity-60" />
+              </motion.div>
             </motion.div>
           </motion.div>
         </motion.div>
