@@ -1,14 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Menu, X } from 'lucide-react';
-import Logo from './Logo';
+import { FocusTrap } from '@headlessui/react'; // For focus trapping in mobile menu
+import Logo from './Logo'; // Assuming Logo component is well-defined
 
-function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMode, toggleDarkMode }) {
+function EnhancedModernHeader({
+  logoInNavbar = true, // Default to true, meaning logo is initially prominent
+  activeSection,
+  navItems = [], // Provide a default empty array
+  isDarkMode,
+  toggleDarkMode,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const headerRef = useRef(null);
+  const mobileMenuButtonRef = useRef(null);
 
+  // Dark mode effect
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -17,268 +26,262 @@ function EnhancedModernHeader({ logoInNavbar, activeSection, navItems, isDarkMod
     }
   }, [isDarkMode]);
 
+  // Scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 100);
+      setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const headerVariants = {
-    top: {
-      backdropFilter: 'blur(0px)',
-      background: 'transparent',
-      boxShadow: 'none',
-      height: '80px',
-    },
-    scrolled: {
-      backdropFilter: 'blur(18px)',
-      background: isDarkMode 
-      ? '#1E1E1E'
-      : '#F5F5F5',
-      boxShadow: 'none',
-      height: '80px',
+  // Keyboard accessibility for mobile menu (Escape key)
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [menuOpen]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
-  };
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen]);
+
+  const headerBaseStyles = `fixed top-0 w-full z-50 flex items-center justify-between px-4 sm:px-6 py-3 transition-all duration-300 ease-in-out text-slate-700 dark:text-slate-200`;
+  const headerScrolledStyles = `
+    bg-white/80 dark:bg-black backdrop-blur-lg h-[70px]
+    shadow-md
+    dark:shadow-[0_2px_6px_rgba(255,255,255,0.15)]
+  `;
+  const headerTopStyles = `bg-transparent h-[80px]`;
 
   const mobileMenuVariants = {
     closed: {
       opacity: 0,
-      x: "100%",
+      x: shouldReduceMotion ? 0 : '100%',
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 300,
-        damping: 30
-      }
+        damping: 30,
+        when: 'afterChildren',
+      },
     },
     open: {
       opacity: 1,
       x: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 300,
         damping: 30,
-        staggerChildren: 0.07,
-        delayChildren: 0.1
-      }
-    }
+        staggerChildren: shouldReduceMotion ? 0 : 0.07,
+        delayChildren: shouldReduceMotion ? 0 : 0.1,
+      },
+    },
   };
 
   const menuItemVariants = {
-    closed: { x: 20, opacity: 0 },
-    open: { x: 0, opacity: 1 }
+    closed: { x: shouldReduceMotion ? 0 : 20, opacity: 0 },
+    open: { x: 0, opacity: 1 },
   };
 
   const MobileMenu = () => (
     <>
-      <button 
+      {/* Mobile Menu Button */}
+      <motion.button
+        ref={mobileMenuButtonRef}
         onClick={() => setMenuOpen(!menuOpen)}
-        className="relative z-50 p-2 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-        aria-label={menuOpen ? "Close menu" : "Open menu"}
+        className="md:hidden relative z-[60] p-2 rounded-full text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+        aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={menuOpen}
+        aria-controls="mobile-menu-nav"
+        whileHover={{ scale: shouldReduceMotion ? 1 : 1.1 }}
+        whileTap={{ scale: shouldReduceMotion ? 1 : 0.9 }}
       >
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           {menuOpen ? (
             <motion.div
               key="close"
-              initial={{ opacity: 0, rotate: -90 }}
+              initial={{ opacity: 0, rotate: shouldReduceMotion ? 0 : -90 }}
               animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: 90 }}
+              exit={{ opacity: 0, rotate: shouldReduceMotion ? 0 : 90 }}
               transition={{ duration: 0.2 }}
             >
-              <X size={24} className={isDarkMode ? "text-white" : "text-gray-800"} />
+              <X size={24} />
             </motion.div>
           ) : (
             <motion.div
               key="menu"
-              initial={{ opacity: 0, rotate: 90 }}
+              initial={{ opacity: 0, rotate: shouldReduceMotion ? 0 : 90 }}
               animate={{ opacity: 1, rotate: 0 }}
-              exit={{ opacity: 0, rotate: -90 }}
+              exit={{ opacity: 0, rotate: shouldReduceMotion ? 0 : -90 }}
               transition={{ duration: 0.2 }}
             >
-              <Menu size={24} className={isDarkMode ? "text-white" : "text-gray-800"} />
+              <Menu size={24} />
             </motion.div>
           )}
         </AnimatePresence>
-      </button>
+      </motion.button>
 
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            className={`fixed inset-0 z-40 ${isDarkMode ? 'bg-black/60' : 'bg-gray-800/40'}`}
+            className="fixed inset-0 z-[55] bg-black/50 dark:bg-black/70 md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMenuOpen(false)}
           >
-            <motion.div
-              className={`absolute top-0 right-0 h-screen w-2/3 max-w-sm p-6 pt-24 ${
-                isDarkMode 
-                  ? 'bg-zinc-900 text-white' 
-                  : 'bg-white text-gray-800'
-              }`}
-              variants={mobileMenuVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <nav className="flex flex-col space-y-6">
-                {navItems.map((item) => (
-                  <motion.a
-                    key={item.name}
-                    href={item.href}
-                    variants={menuItemVariants}
-                    className={`text-xl font-medium ${
-                      activeSection === item.name.toLowerCase()
-                        ? isDarkMode ? 'text-indigo-400' : 'text-indigo-600'
-                        : isDarkMode ? 'text-gray-300 hover:text-indigo-400' : 'text-gray-700 hover:text-indigo-600'
-                    } transition-all duration-200`}
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {item.name}
-                  </motion.a>
-                ))}
-              </nav>
-            </motion.div>
+            <FocusTrap active={menuOpen}>
+              <motion.div
+                id="mobile-menu-nav"
+                role="dialog"
+                aria-modal="true"
+                className="absolute top-0 right-0 h-full w-4/5 max-w-xs p-6 pt-20 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-xl"
+                variants={mobileMenuVariants}
+                initial="closed"
+                animate="open"
+                exit="closed"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <nav className="flex flex-col space-y-5">
+                  {navItems.map((item) => (
+                    <motion.a
+                      key={item.name}
+                      href={item.href}
+                      variants={menuItemVariants}
+                      className={`block py-2 text-lg font-medium transition-colors duration-200
+                        ${
+                          activeSection === item.href
+                            ? 'text-indigo-600 dark:text-indigo-400'
+                            : 'hover:text-indigo-600 dark:hover:text-indigo-400'
+                        }`}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      {item.name}
+                    </motion.a>
+                  ))}
+                </nav>
+              </motion.div>
+            </FocusTrap>
           </motion.div>
         )}
       </AnimatePresence>
     </>
   );
 
-  // Handle dark mode toggle button with a modern design
   const DarkModeButton = () => (
     <motion.button
       onClick={toggleDarkMode}
-      aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-      className={`relative flex items-center justify-center w-10 h-10 rounded-full overflow-hidden
-        transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
-          isDarkMode 
-            ? 'bg-black text-white border border-white/20' 
-            : 'bg-white text-black border border-black/20'
-        }`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      className={`relative flex items-center justify-center w-10 h-10 rounded-full 
+                   border border-slate-300 dark:border-slate-700 
+                   bg-white dark:bg-slate-800 
+                   text-slate-700 dark:text-yellow-400 
+                   hover:bg-slate-100 dark:hover:bg-slate-700
+                   focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900
+                   transition-colors duration-200`}
+      whileHover={{ scale: shouldReduceMotion ? 1 : 1.1, rotate: shouldReduceMotion ? 0 : (isDarkMode ? -15 : 15) }}
+      whileTap={{ scale: shouldReduceMotion ? 1 : 0.9 }}
     >
-      <AnimatePresence mode="wait">
-        {isDarkMode ? (
-          <motion.div
-            key="moon"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="relative"
-          >
-            <Moon size={18} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="sun"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="relative"
-          >
-            <Sun size={18} />
-          </motion.div>
-        )}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={isDarkMode ? 'moon' : 'sun'}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : (isDarkMode ? 10 : -10) }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: shouldReduceMotion ? 0 : (isDarkMode ? -10 : 10) }}
+          transition={{ duration: 0.2 }}
+        >
+          {isDarkMode ? <Moon size={20} /> : <Sun size={20} />}
+        </motion.div>
       </AnimatePresence>
     </motion.button>
   );
 
   return (
-    <>
-      <motion.header
-        ref={headerRef}
-        className={`fixed top-0 w-full z-40 flex items-center justify-between px-5 sm:px-8 py-4 transition-all duration-200
-          ${isDarkMode 
-            ? 'text-white' 
-            : 'text-black'}`}
-        initial="top"
-        animate={isScrolled ? "scrolled" : "top"}
-        variants={headerVariants}
-        transition={{ type: 'spring', stiffness: 200, damping: 26 }}
+    <header
+      ref={headerRef}
+      className={`${headerBaseStyles} ${isScrolled ? headerScrolledStyles : headerTopStyles}`}
+    >
+      {/* Logo Section */}
+      <motion.div
+        className="flex-shrink-0"
+        initial={{ opacity: logoInNavbar ? 1 : 0.7, scale: logoInNavbar ? 1 : 0.95 }}
+        animate={{
+          opacity: (logoInNavbar || isScrolled) ? 1 : 0.7,
+          scale: (logoInNavbar || isScrolled) ? 1 : 0.95,
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        {/* Logo Section */}
-        <motion.div
-          className="flex items-center"
-          initial={{ opacity: 0.6 }}
-          animate={{ 
-            opacity: isScrolled ? 1 : logoInNavbar ? 1 : 0.6,
-            scale: isScrolled ? 1 : 0.95
+        <Logo
+          isScrolled={isScrolled}
+          shouldReduceMotion={shouldReduceMotion}
+          isDarkMode={isDarkMode}
+        />
+      </motion.div>
+
+      {/* Navigation and Controls */}
+      <div className="flex items-center space-x-3 sm:space-x-5">
+        {/* Desktop Navigation Links */}
+        <motion.nav
+          className="hidden md:flex items-center space-x-1"
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            delay: 0.2,
+            ease: "easeOut",
+            staggerChildren: shouldReduceMotion ? 0 : 0.1,
           }}
-          transition={{ duration: 0.4 }}
         >
-          <Logo logoInNavbar={logoInNavbar || isScrolled} shouldReduceMotion={shouldReduceMotion} isDarkMode={isDarkMode} />
-        </motion.div>
+          {navItems.map((item) => (
+            <motion.a
+              key={item.name}
+              href={item.href}
+              className={`relative px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                hover:text-black dark:hover:text-white
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900
+                ${
+                  activeSection === item.href
+                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/50'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                }`}
+              initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              whileHover={{ y: shouldReduceMotion ? 0 : -2 }}
+            >
+              {item.name}
+              {activeSection === item.href && (
+                <motion.div
+                  layoutId="activeDesktopLinkUnderline"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400"
+                  initial={false}
+                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                />
+              )}
+            </motion.a>
+          ))}
+        </motion.nav>
 
-        {/* Main Navigation - Desktop */}
-        <div className="flex items-center space-x-4">
-          {/* Nav Links - Desktop */}
-          <motion.nav 
-            className="hidden md:flex items-center gap-2 mr-2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ 
-              opacity: isScrolled ? 1 : 0,
-              x: isScrolled ? 0 : 20,
-              pointerEvents: isScrolled ? 'auto' : 'none'
-            }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 260, 
-              damping: 20,
-              delay: 0.1
-            }}
-          >
-            {navItems.map((item, idx) => (
-              <motion.a
-                key={item.name}
-                href={item.href}
-                className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all ${isDarkMode ? 'border border-white/20 ' : 'border border-black/20'} 
-                  ${activeSection === item.name.toLowerCase() 
-                    ? isDarkMode 
-                      ? 'text-white bg-black/20 shadow-gold-glow font-bold' 
-                      : 'text-black bg-white/20 shadow-gold-glow font-bold'
-                    : isDarkMode 
-                      ? 'text-white hover:bg-white hover:text-black' 
-                      : 'text-black hover:bg-black hover:text-white'
-                  }`}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ 
-                  opacity: 1,
-                  y: 0
-                }}
-                transition={{ 
-                  duration: 0.3,
-                  delay: 0.1 + (idx * 0.05)
-                }}
-              >
-                {item.name}
-              </motion.a>
-            ))}
-          </motion.nav>
+        {/* Dark Mode Toggle */}
+        <DarkModeButton />
 
-          {/* Dark Mode Toggle - Always Visible */}
-          <DarkModeButton />
-
-          {/* Mobile Menu Trigger - Only Visible When Scrolled on Mobile */}
-          <motion.div 
-            className="md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: isScrolled ? 1 : 0,
-              pointerEvents: isScrolled ? 'auto' : 'none'
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <MobileMenu />
-          </motion.div>
-        </div>
-      </motion.header>
-    </>
+        {/* Mobile Menu Component */}
+        <MobileMenu />
+      </div>
+    </header>
   );
 }
+
 export default EnhancedModernHeader;

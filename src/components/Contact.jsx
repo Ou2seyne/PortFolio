@@ -230,12 +230,12 @@ export default function Contact() {
               variants={itemVariants}
               className="mt-8"
             >
-              <h4 className="text-sm uppercase text-gray-500 dark:text-gray-400 mb-3">Suivez-nous</h4>
+              <h4 className="text-sm uppercase text-gray-500 dark:text-gray-400 mb-3">Suivez Moi</h4>
               <div className="flex gap-3">
                 {['twitter', 'instagram', 'linkedin'].map((social, index) => (
                   <motion.a
                     key={social}
-                    href={`https://${social}.com`}
+                    href={`https://${social}.com/ou2seyne_`}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ y: -5, scale: 1.1 }}

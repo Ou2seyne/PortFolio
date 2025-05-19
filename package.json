@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.3",
     "@splinetool/react-spline": "^4.0.0",
     "@splinetool/runtime": "^1.9.87",
     "@tailwindcss/line-clamp": "^0.4.4",
