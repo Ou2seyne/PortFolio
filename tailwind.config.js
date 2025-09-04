@@ -1,17 +1,18 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}", // tous les fichiers React
   ],
   theme: {
     extend: {
       colors: {
-        background: '#000000',  // Pure black background
-        foreground: '#f4f4f5',  // Light text
-        accent: '#121212',      // Darker accent for sections if needed
-        subtle: '#2a2a2a',      // Slightly lighter than background
-        gold: '#fbbf24',         // Gold
-        link: '#fbbf24',         // Links are gold too
+        background: '#000000',
+        foreground: '#f4f4f5',
+        accent: '#121212',
+        subtle: '#2a2a2a',
+        gold: '#fbbf24',
+        link: '#fbbf24',
         customyellow: '#eec745',
         grandiant: '#fefcf4',
       },
@@ -29,8 +30,6 @@ module.exports = {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/line-clamp'),
-  ],
-  darkMode: 'class', // Enable dark mode based on class
-};
+  plugins: [], // line-clamp intégré depuis Tailwind 3.3
+  darkMode: 'class',
+}
