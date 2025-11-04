@@ -34,16 +34,16 @@ const roadmap = [
     details: 'Je me suis concentré sur la conception web interactive et les principes d\'UI/UX.',
   },
   {
-    year: '2024/2025',
+    year: '2025',
     title: 'BTS Services Informatiques aux Organisations (SIO)',
     icon: '💻',
     details: 'Formation en développement web et systèmes, avec un focus particulier sur la conception d\'interfaces utilisateurs.',
   },
   {
-    year: '2025/2026',
+    year: '2026/2027',
     title: 'Prévisions futures',
     icon: '🚀',
-    details: 'Après mon BTS SIO, je prévois de continuer en licence pour approfondir mes compétences en informatique, puis intégrer une école d\'ingénieurs pour me spécialiser dans le développement et le design.',
+    details: 'Licence pour approfondir mes compétences en informatique, puis intégrer une école d\'ingénieurs pour me spécialiser dans le développement et le design.',
   },
 ];
 

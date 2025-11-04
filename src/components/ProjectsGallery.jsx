@@ -41,7 +41,7 @@ const floatingAnimationSlight = {
 
 const shimmerAnimation = {
   backgroundPosition: ["-200% 0%", "200% 0%"],
-  transition: { duration: 1.8, ease: "linear", repeat: Infinity },
+  transition: { duration: 1.2, ease: "linear" },
 };
 
 const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, cardVariants, isGridView }) => {
@@ -62,13 +62,12 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
 
   const overlayAnimation = {
     animate: {
-      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-      backgroundColor: isHovering ? "rgba(234,179,8,0.2)" : "rgba(0,0,0,0)",
+      backgroundPosition: ["0% 50%", "60% 50%"],
+      backgroundColor: isHovering ? "rgba(234,179,8,0.15)" : "rgba(0,0,0,0)",
     },
     transition: {
-      duration: isHovering ? 4 : 0,
+      duration: 0.6,
       ease: "linear",
-      repeat: Infinity,
     },
   };
 
@@ -111,8 +110,8 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
             <motion.button
               onClick={(e) => { e.stopPropagation(); toggleFavorite(e, project.id || project.title); }}
               className="p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-customyellow"
-              whileHover={{ scale: 1.25, rotate: 7 }}
-              whileTap={{ scale: 0.9, rotate: -18 }}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.96 }}
               aria-label={project.isFavorite ? `Retirer ${project.title} des favoris` : `Ajouter ${project.title} aux favoris`}
               title={project.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
@@ -132,7 +131,7 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
                 background: `linear-gradient(90deg, ${isDarkMode ? 'rgba(50,50,50,0.8)' : 'rgba(220,220,220,0.8)'} 25%, ${isDarkMode ? 'rgba(70,70,70,0.7)' : 'rgba(200,200,200,0.7)'} 50%, ${isDarkMode ? 'rgba(50,50,50,0.8)' : 'rgba(220,220,220,0.8)'} 75%)`,
                 backgroundSize: "400% 100%",
               }}
-              animate={shimmerAnimation}
+              animate={prefersReducedMotion ? {} : shimmerAnimation}
             />
           )}
           <motion.img
@@ -195,7 +194,7 @@ const ProjectCard = ({ project, isDarkMode, toggleFavorite, handleOpenModal, i, 
                 initial={{ opacity: 0, y: 12 }}
                 animate={ isInView ? { opacity: 1, y: 0 } : {} }
                 transition={{ delay: 0.45 + (index * 0.06) + (i * 0.02), ...gentleSpring }}
-                whileHover={ prefersReducedMotion ? {} : { scale: 1.12, rotate: Math.random() > 0.5 ? 3 : -3, backgroundColor: isDarkMode ? '#525252' : '#e0e0e0', transition: {type: "spring", stiffness: 350, damping: 10} }}
+                whileHover={ prefersReducedMotion ? {} : { scale: 1.06, backgroundColor: isDarkMode ? '#525252' : '#e0e0e0', transition: {type: "spring", stiffness: 250, damping: 16} }}
               >
                 {tool}
               </motion.span>
@@ -586,15 +585,15 @@ function ProjectsGallery({ isDarkMode }) {
                     background: `linear-gradient(110deg, ${isDarkMode ? '#3a3a3a' : '#e0e0e0'} 8%, ${isDarkMode ? '#4f4f4f' : '#f0f0f0'} 18%, ${isDarkMode ? '#3a3a3a' : '#e0e0e0'} 33%)`,
                     backgroundSize: "200% 100%",
                   }}
-                  animate={shimmerAnimation}
+                  animate={prefersReducedMotion ? {} : shimmerAnimation}
                 />
                 <div className="p-5">
-                  <motion.div className={`h-6 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-300'} rounded mb-3 w-3/4`} style={{ backgroundSize: "200% 100%"}} animate={shimmerAnimation} transition={{delay:0.1, ...shimmerAnimation.transition}}/>
-                  <motion.div className={`h-4 ${isDarkMode ? 'bg-neutral-600/80' : 'bg-gray-200'} rounded mb-2 w-full`} style={{ backgroundSize: "200% 100%"}} animate={shimmerAnimation} transition={{delay:0.15, ...shimmerAnimation.transition}}/>
-                  <motion.div className={`h-4 ${isDarkMode ? 'bg-neutral-600/80' : 'bg-gray-200'} rounded w-2/3 mb-4`} style={{ backgroundSize: "200% 100%"}} animate={shimmerAnimation} transition={{delay:0.2, ...shimmerAnimation.transition}}/>
+                  <motion.div className={`h-6 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-300'} rounded mb-3 w-3/4`} style={{ backgroundSize: "200% 100%"}} animate={prefersReducedMotion ? {} : shimmerAnimation} transition={{delay:0.1, ...shimmerAnimation.transition}}/>
+                  <motion.div className={`h-4 ${isDarkMode ? 'bg-neutral-600/80' : 'bg-gray-200'} rounded mb-2 w-full`} style={{ backgroundSize: "200% 100%"}} animate={prefersReducedMotion ? {} : shimmerAnimation} transition={{delay:0.15, ...shimmerAnimation.transition}}/>
+                  <motion.div className={`h-4 ${isDarkMode ? 'bg-neutral-600/80' : 'bg-gray-200'} rounded w-2/3 mb-4`} style={{ backgroundSize: "200% 100%"}} animate={prefersReducedMotion ? {} : shimmerAnimation} transition={{delay:0.2, ...shimmerAnimation.transition}}/>
                   <div className="flex gap-2">
-                    <motion.div className={`h-7 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'} rounded-full w-16`} style={{ backgroundSize: "200% 100%"}} animate={shimmerAnimation} transition={{delay:0.25, ...shimmerAnimation.transition}}/>
-                    <motion.div className={`h-7 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'} rounded-full w-20`} style={{ backgroundSize: "200% 100%"}} animate={shimmerAnimation} transition={{delay:0.3, ...shimmerAnimation.transition}}/>
+                    <motion.div className={`h-7 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'} rounded-full w-16`} style={{ backgroundSize: "200% 100%"}} animate={prefersReducedMotion ? {} : shimmerAnimation} transition={{delay:0.25, ...shimmerAnimation.transition}}/>
+                    <motion.div className={`h-7 ${isDarkMode ? 'bg-neutral-700' : 'bg-gray-200'} rounded-full w-20`} style={{ backgroundSize: "200% 100%"}} animate={prefersReducedMotion ? {} : shimmerAnimation} transition={{delay:0.3, ...shimmerAnimation.transition}}/>
                   </div>
                 </div>
               </motion.div>

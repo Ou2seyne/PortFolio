@@ -105,50 +105,7 @@ export default function ModernHero({ isDarkMode }) {
         transition: "background-color 0.7s ease, color 0.7s ease",
       }}
     >
-      <WebGLBackground sectionRef={sectionRef} theme={theme} />
-      
-      <motion.div 
-        className="absolute top-1/4 -left-20 w-64 h-64 rounded-full pointer-events-none"
-        style={{ background: colors.bgTint, filter: "blur(60px)", transition: "background 0.5s ease" }}
-        initial={{ opacity: 0, scale: 0.8, x: 0, y:0, rotate: 0 }}
-        animate={isInView && !shouldReduceMotion ? {
-          opacity: [0, 0.15, 0.1, 0.15], scale: [0.8, 1.2, 1.1, 1.2],
-          x: [0, 20, 25, 20], y: [0, 0, -15, 0],
-          rotate: [0, -10, 5, 0] // Added rotation
-        } : { opacity: 0, scale: 0.8, x: 0, y:0, rotate: 0 }}
-        transition={isInView && !shouldReduceMotion ? {
-          duration: 7, ease: "easeInOut", repeat: Infinity, repeatType: "mirror", times: [0, 0.3, 0.65, 1] // Increased duration for smoother rotation
-        } : { duration: 0.5, ease: "easeOut" }}
-      />
-      
-      <motion.div 
-        className="absolute bottom-1/4 right-20 w-96 h-96 rounded-full pointer-events-none"
-        style={{ background: colors.bgTint, filter: "blur(80px)", transition: "background 0.5s ease" }}
-        initial={{ opacity: 0, scale: 0.7, x: 0, y:0, rotate: 0 }}
-        animate={isInView && !shouldReduceMotion ? {
-          opacity: [0, 0.1, 0.07, 0.1], scale: [0.7, 1.1, 1.0, 1.1],
-          x: [0, -20, -15, -20], y: [0, 20, 25, 20],
-          rotate: [0, 12, -8, 0] // Added rotation
-        } : { opacity: 0, scale: 0.7, x: 0, y:0, rotate: 0 }}
-        transition={isInView && !shouldReduceMotion ? {
-          duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "mirror", delay: 0.5, times: [0, 0.3, 0.65, 1] // Increased duration
-        } : { duration: 0.5, ease: "easeOut" }}
-      />
-
-      {!shouldReduceMotion && (
-        <motion.div 
-          className="absolute inset-0 pointer-events-none z-10"
-          animate={{ x: mousePosition.x * 10, y: mousePosition.y * 10 }}
-          transition={{ type: "spring", stiffness: 100, damping: 20, mass: 0.5 }} // Changed to spring, adjusted params
-        >
-          <div className="absolute top-1/3 left-1/4 w-6 h-6 rounded-full" 
-            style={{ background: colors.primaryGradient, opacity: 0.3, filter: "blur(8px)", transition: "background 0.5s ease" }}
-          />
-          <div className="absolute bottom-1/3 right-1/4 w-4 h-4 rounded-full" 
-            style={{ background: colors.primaryGradient, opacity: 0.2, filter: "blur(6px)", transition: "background 0.5s ease" }}
-          />
-        </motion.div>
-      )}
+      <WebGLBackground sectionRef={sectionRef} theme={theme} enabled={false} />
 
       <div className="container mx-auto px-6 py-12 flex flex-col lg:flex-row items-center z-20">
         <div className="lg:w-1/2 flex flex-col space-y-8 text-center lg:text-left">

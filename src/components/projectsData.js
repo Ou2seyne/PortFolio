@@ -33,7 +33,7 @@ const allProjects = [
     tag: 'Site Web',
     tools: ['Next.js', 'Tailwind CSS'],
     image: './src/assets/images/lodan-market.png',
-    link: 'https://lodanmarket.fr',
+    link: 'https://6909dbce6dacbd00a7f28dc4--adorable-heliotrope-0e10de.netlify.app/',
     status: 'completed',
     date: '2024',
     dateRange: 'Février 2024 - Juin 2024',

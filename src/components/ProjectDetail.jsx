@@ -257,8 +257,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
   // New state variables for enhanced features
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isShowingGallery, setIsShowingGallery] = useState(false);
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-  const [rating, setRating] = useState(0);
+  // Removed feedback UI state to simplify modal
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
 
   const mouseX = useMotionValue(0);
@@ -275,6 +274,12 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
     }
     return images;
   }, [project.image]);
+
+  const visitLink = useMemo(() => {
+    const url = project.demoLink || project.githubLink || project.link;
+    if (!url || url === '#') return null;
+    return url;
+  }, [project.demoLink, project.githubLink, project.link]);
 
   useEffect(() => {
     setReduceMotionPref(RMF());
@@ -411,7 +416,8 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
         }}
         onClick={onClose}
       >
-        {!reduceMotionPref && <DynamicAbstractBackground isDarkMode={isDarkMode} patternType="particles" particleCount={isDarkMode ? 25 : 15} />}
+        {/* Disabled animated background for performance */}
+        {/* {!reduceMotionPref && <DynamicAbstractBackground isDarkMode={isDarkMode} patternType="particles" particleCount={isDarkMode ? 25 : 15} />} */}
       </motion.div>
       
       <motion.div
@@ -455,7 +461,8 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                 border-b md:border-b-0 ${isDarkMode ? 'border-neutral-700/25' : 'border-gray-200/60'}`}
             variants={contentChildVariants(RMF() ? 0 : 0.1)}
             >
-            <DynamicAbstractBackground isDarkMode={isDarkMode} patternType="grid" />
+            {/* Disabled animated background for performance */}
+            {/* <DynamicAbstractBackground isDarkMode={isDarkMode} patternType="grid" /> */}
 
             <motion.h3 variants={sectionTitleVariants} className={`text-xl sm:text-2xl font-black mb-5 sm:mb-7 ${isDarkMode ? 'text-customyellow-700' : 'text-customyellow-700'}`}>
                 <AnimatedText text="Synthèse Projet" type="char" variant="title" stagger={0.03} delay={isVisible && !RMF() ? 0.2 : 0} isVisible={isVisible} />
@@ -553,6 +560,25 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                 </span>
                 </motion.div>
             </motion.div>
+
+            {/* Primary visit button */}
+            {visitLink && (
+              <motion.a
+                href={visitLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold mb-7 focus:outline-none focus-visible:ring-2 shadow-md ${
+                  isDarkMode
+                    ? 'bg-gold text-neutral-900 hover:bg-gold/90 focus-visible:ring-gold/70 border border-gold/40 shadow-gold/25'
+                    : 'bg-customyellow-600 text-neutral-900 hover:bg-customyellow-500 focus-visible:ring-customyellow-700/70 border border-customyellow-700/40 shadow-yellow-500/30'
+                }`}
+                whileHover={reduceMotionPref ? {} : { scale: 1.02 }}
+                whileTap={reduceMotionPref ? {} : { scale: 0.98 }}
+              >
+                Visiter le projet
+                <ExternalLink size={14} />
+              </motion.a>
+            )}
             {/* Conditional Links section */}
             {(project.links?.length > 0 || project.demoLink || project.githubLink) && (
                 <motion.div variants={contentChildVariants(0.5)} className="mb-7">
@@ -597,68 +623,7 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                 </motion.div>
             )}
             
-            {/* Quick feedback section */}
-            <motion.div 
-                variants={contentChildVariants(0.6)}
-                className="mt-auto md:mb-5"
-            >
-                {!showFeedbackForm ? (
-                <motion.button
-                    onClick={() => setShowFeedbackForm(true)}
-                    className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium 
-                    ${isDarkMode ? 'bg-neutral-800 hover:bg-neutral-700 text-gray-200' : 'bg-white hover:bg-gray-100 text-gray-700'}`}
-                    whileHover={{ scale: 1.03, transition: { ...hyperSpring } }}
-                >
-                    Évaluer ce projet
-                </motion.button>
-                ) : (
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="w-full"
-                >
-                    <p className={`text-sm mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Quelle note donneriez-vous?</p>
-                    <div className="flex gap-1 mb-3">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                        <motion.button
-                        key={star}
-                        onClick={() => setRating(star)}
-                        className={`p-1 ${rating >= star ? (isDarkMode ? 'text-gold' : 'text-customyellow-600') : (isDarkMode ? 'text-neutral-700' : 'text-gray-300')}`}
-                        whileHover={{ scale: 1.3, transition: { ...hyperSpring } }}
-                        whileTap={{ scale: 0.9 }}
-                        >
-                        <Star size={20} fill={rating >= star ? (isDarkMode ? '#eab308' : '#ca8a04') : 'none'} />
-                        </motion.button>
-                    ))}
-                    </div>
-                    <div className="flex gap-2">
-                    <motion.button
-                        onClick={() => {
-                        setShowFeedbackForm(false);
-                        setRating(0);
-                        }}
-                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border
-                        ${isDarkMode ? 'border-neutral-700 hover:bg-neutral-800 text-gray-300' : 'border-gray-200 hover:bg-gray-100 text-gray-600'}`}
-                        whileHover={{ scale: 1.03, transition: { ...hyperSpring } }}
-                    >
-                        Annuler
-                    </motion.button>
-                    <motion.button
-                        onClick={() => {
-                        setShowFeedbackForm(false);
-                        // Here we would submit the feedback
-                        }}
-                        className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium
-                        ${isDarkMode ? 'bg-gold hover:bg-gold/90 text-neutral-900' : 'bg-customyellow-600 hover:bg-customyellow-700 text-white'}`}
-                        whileHover={{ scale: 1.03, transition: { ...hyperSpring } }}
-                    >
-                        Envoyer
-                    </motion.button>
-                    </div>
-                </motion.div>
-                )}
-            </motion.div>
+            {/* Quick feedback section removed as requested */}
             </motion.aside>
 
             {/* === Main Content Area === */}

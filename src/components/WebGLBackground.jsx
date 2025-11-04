@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
-export default function WebGLBackground({ sectionRef }) {
+export default function WebGLBackground({ sectionRef, enabled = false }) {
   useEffect(() => {
+    if (!enabled) return;
     if (!sectionRef.current) return;
     const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (shouldReduceMotion) return;
@@ -111,6 +112,6 @@ export default function WebGLBackground({ sectionRef }) {
       cancelAnimationFrame(animationFrameId);
       if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
     };
-  }, [sectionRef]);
+  }, [sectionRef, enabled]);
   return null;
 }

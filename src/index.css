@@ -52,8 +52,14 @@ body {
   width: 100%;
 }
 
-/* Add this to ensure smooth transitions */
-transition: 'transform 0.1s ease-out';
+/* Global reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 :root {
   --gold: #eab308;
