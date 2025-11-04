@@ -39,6 +39,11 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
     });
   };
 
+  // Ensure the correct class is set on initial mount and when system preference changes
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
   // --- Global Blob Blur Background with scroll parallax ---
   const { scrollYProgress } = useScroll();
   // Generate static blob parameters only once
@@ -85,7 +90,7 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
             top: blob.yMotion, // Parallax scroll effect
             background: blob.color,
             borderRadius: '50%',
-            opacity: 0.55,
+            opacity: isDarkMode ? 0.55 : 0.12,
           }}
           animate={{
             scale: [1, 1.14, 0.98, 1],
@@ -133,7 +138,7 @@ function AppRoutes({ contactModalOpen, setContactModalOpen }) {
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <motion.div 
-                    className={`w-0.5 h-10 ${isDarkMode ? 'bg-black' : 'bg-white'}`}
+                    className={`w-0.5 h-10 ${isDarkMode ? 'bg-white' : 'bg-black'}`}
                   />
                 </motion.div>
               </motion.div>
@@ -239,7 +244,7 @@ export default function App() {
   return (
     <Router>
       <div
-        className="min-h-screen flex flex-col items-center justify-between transition-colors duration-300 bg-white dark:bg-black dark:text-gray-100 text-black"
+        className="min-h-screen flex flex-col items-center justify-between transition-colors duration-300 bg-background text-foreground"
       >
         <AppRoutes contactModalOpen={contactModalOpen} setContactModalOpen={setContactModalOpen} />
       </div>

@@ -641,16 +641,16 @@ function ProjectDetail({ project, onClose, uniqueKey, isDarkMode }) {
                     {isShowingGallery ? (
                         <div className="absolute inset-0 z-10 bg-black/80 flex flex-col">
                             {/* Gallery Navigation Header */}
-                            <div className={`flex items-center justify-between p-4 ${isDarkMode ? 'bg-neutral-900' : 'bg-gray-800'}`}>
+                            <div className={`flex items-center justify-between p-4 ${isDarkMode ? 'bg-neutral-900' : 'bg-white/95 border-b border-gray-200'}`}>
                                 <motion.button
                                     onClick={toggleGallery}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${isDarkMode ? 'text-white bg-neutral-800 hover:bg-neutral-700' : 'text-white bg-gray-700 hover:bg-gray-600'}`}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${isDarkMode ? 'text-white bg-neutral-800 hover:bg-neutral-700' : 'text-gray-800 bg-white border border-gray-300 hover:bg-gray-100'}`}
                                     whileHover={{ x: -3 }}
                                 >
                                     <ChevronLeft size={16} />
                                     <span>Retour</span>
                                 </motion.button>
-                                <span className="text-sm text-white font-medium">
+                                <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
                                     {currentImageIndex + 1} / {projectImages.length}
                                 </span>
                             </div>

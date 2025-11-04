@@ -7,14 +7,24 @@
 /* Define design tokens so utilities like bg-background work in v4 */
 @theme {
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* Light mode defaults */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-accent: #f5f5f5;
+  --color-subtle: #e5e5e5;
+  --color-gold: #fbbf24;
+  --color-link: #f59e0b;
+  --color-customyellow: #eec745;
+  --color-grandiant: #fefcf4;
+}
+
+/* Dark mode token overrides when `.dark` class is present on html or body */
+:root.dark, .dark {
   --color-background: #000000;
   --color-foreground: #f4f4f5;
   --color-accent: #121212;
   --color-subtle: #2a2a2a;
-  --color-gold: #fbbf24;
   --color-link: #fbbf24;
-  --color-customyellow: #eec745;
-  --color-grandiant: #fefcf4;
 }
 
 body {
